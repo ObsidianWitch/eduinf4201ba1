@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(TP1_2)
 
 SET(CMAKE_CXX_COMPILER "gcc")
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra")
+SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c99")
 
 # Exercice 1
 add_executable(exo1_client.out
@@ -11,8 +11,7 @@ add_executable(exo1_client.out
     exo1/tools.h
 )
 
-# TODO tools.c/.h needed here?
-add_executable(exo2_serveur.out
+add_executable(exo1_serveur.out
     exo1/serveur.c
     exo1/tools.c
     exo1/tools.h

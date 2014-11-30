@@ -28,7 +28,7 @@ int sendto_complete(int sockfd, char* msg, int msg_size,
         int temp_size = sendto(sockfd, msg + sent_size, remaining_size, 0,
             dest_addr, sizeof(*dest_addr));
         if (temp_size == -1) {
-            perror("client - sendto");
+            perror("sendto");
             break;
         }
 
@@ -39,14 +39,37 @@ int sendto_complete(int sockfd, char* msg, int msg_size,
 }
 
 /**
- * Create a message with the following format :
- * out = "pid: in"
- * @param created message
- * @param in Part of the message to create.
+ * Receive a message from a socket and adds a trailing '\0' to it.
+ * @return Returns 0 on success, -1 otherwise.
  */
-void create_msg(char* out, char* in) {
+int recvfrom_helper(int sockfd, char *buffer, int buffer_size, int *recv_size,
+    struct sockaddr *src_addr, socklen_t *addrlen)
+{
+    *recv_size = recvfrom(sockfd, buffer, buffer_size - 1, 0, src_addr, addrlen);
+
+    if (*recv_size == -1) {
+        perror("recvfrom");
+        return -1;
+    }
+
+    buffer[*recv_size] = '\0';
+
+    return 0;
+}
+
+/**
+* Create a message with the following format :
+* out = "pid: in"
+* @param in Part of the message to create.
+* @return created message
+*/
+char* create_msg(const char* in) {
+    char* out;
+
     int pid_length = snprintf(NULL, 0, "%d", getpid());
     int msg_size = sizeof(char) * (pid_length + strlen(in) + 3);
     out = malloc(msg_size);
     snprintf(out, msg_size, "%d: %s", getpid(), in);
+
+    return out;
 }

@@ -5,13 +5,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include "tools.h"
 
 /*
 TODO Le client envoie vers le serveur : son PID + la chaine qui lui a été passée
 TODO gethostbyname
 */
-
-// TODO test sans le serveur (en écoutant les packets reçu en local)
 
 /**
  * Client entry point, the following arguments are needed :
@@ -20,13 +19,13 @@ TODO gethostbyname
  *    - message
  */
 int main(int argc, const char* argv[]) {
-    int sockfd;
+    int sockfd, status, msg_size, recv_size;
     struct hostent *he;
     struct sockaddr_in dest_addr;
-    char* msg;
+    char* msg, *buffer;
 
     if (argc < 4) {
-        puts("Missing arguments.");
+        puts("Missing arguments");
         printf("Usage : %s hostname port message\n", argv[0]);
         return EXIT_FAILURE;
     }
@@ -52,15 +51,20 @@ int main(int argc, const char* argv[]) {
     memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 
     // Create and send message to server
-    create_msg(msg, argv[3]);
-    sendto_complete(sockfd, msg, strlen(msg), (struct sockaddr*) &dest_addr);
+    msg = create_msg(argv[3]);
+    msg_size = strlen(msg) + 1;
+    status = sendto_complete(sockfd, msg, msg_size, (struct sockaddr*) &dest_addr);
+    if (status == -1) {
+        printf("client - the message could not be completely sent to the server.");
+    }
 
-    // TODO receive response
+    // receive message from the server
+    buffer = malloc(msg_size);
+    recvfrom_helper(sockfd, buffer, msg_size, &recv_size , NULL, NULL);
+    printf("client - received %d bytes : %s\n", recv_size, buffer);
 
-    // TODO close/free
-
-    //free(he);
-    //free(msg);
+    free(msg);
+    free(buffer);
     close(sockfd);
 
     return EXIT_SUCCESS;
