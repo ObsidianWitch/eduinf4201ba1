@@ -11,8 +11,8 @@ add_executable(exo1_client.out
     exo1/tools.h
 )
 
-add_executable(exo1_serveur.out
-    exo1/serveur.c
+add_executable(exo1_server.out
+    exo1/server.c
     exo1/tools.c
     exo1/tools.h
 )
