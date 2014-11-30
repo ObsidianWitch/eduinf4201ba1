@@ -4,13 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 #include "tools.h"
 
-/*
-TODO Le client envoie vers le serveur : son PID + la chaine qui lui a été passée
-TODO gethostbyname
-*/
+#define BUFFER_SIZE 256
 
 /**
  * Client entry point, the following arguments are needed :
@@ -59,7 +55,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // receive message from the server
-    buffer = malloc(msg_size);
+    buffer = (msg_size >= BUFFER_SIZE) ? malloc(BUFFER_SIZE) : malloc(msg_size);
     recvfrom_helper(sockfd, buffer, msg_size, &recv_size , NULL, NULL);
     printf("client - received %d bytes : %s\n", recv_size, buffer);
 

@@ -2,9 +2,7 @@
 #include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
 #include "tools.h"
 
 /**
@@ -45,24 +43,31 @@ int sendto_complete(int sockfd, char* msg, int msg_size,
 int recvfrom_helper(int sockfd, char *buffer, int buffer_size, int *recv_size,
     struct sockaddr *src_addr, socklen_t *addrlen)
 {
-    *recv_size = recvfrom(sockfd, buffer, buffer_size - 1, 0, src_addr, addrlen);
-
+    *recv_size = recvfrom(sockfd, buffer, buffer_size, 0, src_addr, addrlen);
     if (*recv_size == -1) {
         perror("recvfrom");
         return -1;
     }
 
-    buffer[*recv_size] = '\0';
+    // Make sure the received message ends with '\0'.
+    if (buffer[*recv_size - 1] != '\0') {
+        if (*recv_size == buffer_size) {
+            buffer[*recv_size - 1] = '\0';
+        }
+        else {
+            buffer[*recv_size] = '\0';
+        }
+    }
 
     return 0;
 }
 
 /**
-* Create a message with the following format :
-* out = "pid: in"
-* @param in Part of the message to create.
-* @return created message
-*/
+ * Create a message with the following format :
+ * out = "pid: in"
+ * @param in Part of the message to create.
+ * @return created message
+ */
 char* create_msg(const char* in) {
     char* out;
 

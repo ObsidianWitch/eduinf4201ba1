@@ -16,8 +16,7 @@ int main(int argc, const char* argv[]) {
     char buffer[BUFFER_SIZE];
 
     if (argc < 2) {
-        puts("Missing arguments");
-        printf("Usage : %s port\n", argv[0]);
+        printf("Missing arguments\nUsage : %s port\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -57,8 +56,8 @@ int main(int argc, const char* argv[]) {
         printf("server - received %d bytes : %s\n", recv_size, buffer);
 
         // send to the client the message we previously received
-        status = sendto_complete(sockfd, buffer, recv_size + 1,
-        (struct sockaddr *) &client_addr);
+        status = sendto_complete(sockfd, buffer, recv_size,
+            (struct sockaddr *) &client_addr);
 
         if (status == -1) {
             printf("server - the message could not be completely sent to %d",
