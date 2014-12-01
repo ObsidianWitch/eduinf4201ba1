@@ -4,24 +4,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "tools.h"
 
-#define BUFFER_SIZE 256
+/*
+* TODO flot de caractères émit par le client
+* TODO clean includes
+* TODO valgrind (le faire aussi pour exo1)
+* TODO A l’aide de Firefox, connectez-vous sur ce serveur et observer les informations
+* transmises par Netscape. En déduire le codage d’une requête http (page voulue) ?
+*/
 
 /**
  * Client entry point, the following arguments are needed :
  *    - server hostname / server IP
  *    - server port
- *    - message
  */
 int main(int argc, const char* argv[]) {
-    int sockfd, status, msg_size, recv_size;
+    int sockfd, status;
     struct hostent *he;
     struct sockaddr_in dest_addr;
-    char* msg, *buffer;
+    char c;
 
-    if (argc < 4) {
-        printf("Missing arguments\nUsage : %s hostname port message\n", argv[0]);
+    if (argc < 3) {
+        printf("Missing arguments\nUsage : %s hostname port\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -32,34 +36,37 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    // Create socket (IPv4, connectionless, UDP)
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    // Create socket (IPv4, connected, TCP)
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
         perror("client - socket init");
         return EXIT_FAILURE;
     }
 
-    // fill dest_addr
+    // Fill dest_addr
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(atoi(argv[2]));
     dest_addr.sin_addr = *((struct in_addr*) he->h_addr);
     memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 
-    // Create and send message to server
-    msg = create_msg(argv[3]);
-    msg_size = strlen(msg) + 1;
-    status = sendto_complete(sockfd, msg, msg_size, (struct sockaddr*) &dest_addr);
+    // Connect the socket
+    status = connect(sockfd, (struct sockaddr*) &dest_addr, sizeof(dest_addr));
     if (status == -1) {
-        printf("client - the message could not be completely sent to the server.");
+        perror("client - connect");
+        return EXIT_FAILURE;
     }
 
-    // receive message from the server
-    buffer = (msg_size >= BUFFER_SIZE) ? malloc(BUFFER_SIZE) : malloc(msg_size);
-    recvfrom_helper(sockfd, buffer, msg_size, &recv_size , NULL, NULL);
-    printf("client - received %d bytes : %s\n", recv_size, buffer);
+    // TODO send message
+    do {
+        int sent_size;
 
-    free(msg);
-    free(buffer);
+        c = getchar();
+        sent_size = send(sockfd, &c, 1, 0);
+        if (sent_size == -1) {
+            perror("client - send");
+        }
+    } while (c != EOF);
+
     close(sockfd);
 
     return EXIT_SUCCESS;
