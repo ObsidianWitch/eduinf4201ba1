@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../socket_tools.h"
+#include "socket_tools.h"
 
 #define REQUEST_LEN 512
 #define BUFFER_LEN 1024

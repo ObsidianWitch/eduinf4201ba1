@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "msg_tools.h"
-#include "../socket_tools.h"
+#include "exo1/msg_tools.h"
+#include "socket_tools.h"
 
 #define BUFFER_SIZE 256
 
