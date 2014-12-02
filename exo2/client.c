@@ -5,14 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/*
-* TODO flot de caractères émit par le client
-* TODO clean includes
-* TODO valgrind (le faire aussi pour exo1)
-* TODO A l’aide de Firefox, connectez-vous sur ce serveur et observer les informations
-* transmises par Netscape. En déduire le codage d’une requête http (page voulue) ?
-*/
-
 /**
  * Client entry point, the following arguments are needed :
  *    - server hostname / server IP
@@ -56,7 +48,6 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    // TODO send message
     do {
         int sent_size;
 

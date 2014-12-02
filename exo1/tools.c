@@ -12,7 +12,6 @@
  * @param msg message to send
  * @param msg_size size of the message to send
  * @param dest_addr address of the target
- * @param addrlen size of dest_addr
  * @return Returns 0 on success, and -1 if the message could not completely be
  * sent.
  */

@@ -3,14 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/*
- * TODO flot de caractères émit par le client
- * TODO clean includes
- * TODO valgrind (le faire aussi pour exo1)
- * TODO A l’aide de Firefox, connectez-vous sur ce serveur et observer les informations
- * transmises par Netscape. En déduire le codage d’une requête http (page voulue) ?
- */
-
 /**
 * Server entry point, the following arguments are required :
 *     - port on which the clients will connect
