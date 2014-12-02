@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "tools.h"
 
 /**
  * Client entry point, the following arguments are needed :

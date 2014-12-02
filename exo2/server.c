@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "../socket_tools.h"
 
 #define BUFFER_LEN 1024
 

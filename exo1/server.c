@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "tools.h"
+#include "msg_tools.h"
+#include "../socket_tools.h"
 
 #define BUFFER_SIZE 256
 
@@ -60,9 +61,7 @@ int main(int argc, const char* argv[]) {
          * received), and create a new message with the server PID.
          */
         extracted_msg = extract_msg(buffer, recv_size);
-        puts(extracted_msg);
         new_msg = create_msg(extracted_msg);
-        puts(new_msg);
 
         // send to the client the new message
         status = sendto_complete(sockfd, new_msg, strlen(new_msg),
