@@ -7,30 +7,16 @@
 #include "tools.h"
 
 #define REQUEST_LEN 512
-#define BUFFER_LEN 512
-
-/*
-Exercice 3
-Ecrire un client qui reçoit en argument :
-• Le nom du serveur auquel on va chercher à ce connecter
-• Le numéro de port de ce serveur
-• Un nom de fichier
-Ce client doit se connecter à un serveur web standard (par exemple intra.esiee.fr) pour
-lui envoyer une requête http demandant l’affichage du nom de fichier donné en argument (par
-exemple index.html). Pour construire la requête, vous utiliserez les informations obtenues par
-le serveur de l’exercice 1.
-Après avoir envoyé sa requête, votre client doit attendre et afficher les données
-envoyées par le serveur.
-Vous vous limiterez au format de pages html pour ce TP
-*/
+#define BUFFER_LEN 1024
 
 void create_GET_request(char* out, const char* host, const char* res,
     const char* port)
 {
     snprintf(out, REQUEST_LEN,
-        "GET %s HTTP/1.1\n"
-        "Host: %s:%s\n"
-        "Accept: text/html\n",
+        "GET %s HTTP/1.1\r\n"
+        "Host: %s:%s\r\n"
+        "Connection: close\r\n"
+        "Accept: text/html\r\n\r\n",
         res, host, port
     );
 }

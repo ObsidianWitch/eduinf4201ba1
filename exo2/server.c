@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define BUFFER_LEN 1024
+
 /**
 * Server entry point, the following arguments are required :
 *     - port on which the clients will connect
@@ -10,7 +12,7 @@
 int main(int argc, const char* argv[]) {
     int sockfd, clientfd, status;
     struct sockaddr_in serv_addr;
-    char c;
+    char buffer[BUFFER_LEN];
 
     if (argc < 2) {
         printf("Missing arguments\nUsage : %s port\n", argv[0]);
@@ -51,18 +53,10 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    do {
-        int recv_size = recv(clientfd, &c, 1, 0);
-        if (recv_size == -1) {
-            perror("server - recv");
-        }
-
-        if (c != EOF) {
-            printf("%c", c);
-        }
-    } while (c != EOF);
+    recv_print(clientfd, buffer, BUFFER_LEN);
 
     close(sockfd);
+    close(clientfd);
 
     return EXIT_SUCCESS;
 }

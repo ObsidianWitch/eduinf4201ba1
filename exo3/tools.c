@@ -46,13 +46,11 @@ int recv_print(int sockfd, char *buf, size_t len) {
     int recv_size;
 
     do {
-        recv_size = recv(sockfd, buf, len - 1, 0);
-        if (recv_size != -1) {
+        recv_size = read(sockfd, buf, len - 1);
+        if (recv_size == -1) {
             perror("recv");
             break;
         }
-
-        printf("%d", recv_size);
 
         if (recv_size != 0) {
             buf[recv_size] = '\0';
@@ -60,5 +58,5 @@ int recv_print(int sockfd, char *buf, size_t len) {
         }
     } while(recv_size != 0);
 
-    return (recv_size >= 0) ? 0 : -1;
+    return recv_size;
 }
