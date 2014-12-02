@@ -6,7 +6,8 @@
 #include <string.h>
 #include "tools.h"
 
-#define REQUEST_MAX_SIZE 512
+#define REQUEST_LEN 512
+#define BUFFER_LEN 512
 
 /*
 Exercice 3
@@ -26,7 +27,7 @@ Vous vous limiterez au format de pages html pour ce TP
 void create_GET_request(char* out, const char* host, const char* res,
     const char* port)
 {
-    snprintf(out, REQUEST_MAX_SIZE,
+    snprintf(out, REQUEST_LEN,
         "GET %s HTTP/1.1\n"
         "Host: %s:%s\n"
         "Accept: text/html\n",
@@ -44,7 +45,7 @@ int main(int argc, const char* argv[]) {
     int sockfd, status;
     struct hostent *he;
     struct sockaddr_in dest_addr;
-    char request[REQUEST_MAX_SIZE];
+    char request[REQUEST_LEN], buffer[BUFFER_LEN];
 
     if (argc < 4) {
         printf("Missing arguments\nUsage : %s hostname port filename\n", argv[0]);
@@ -86,7 +87,13 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    // TODO recv complete response
+    puts(request);
+
+    status = recv_print(sockfd, buffer, BUFFER_LEN);
+    if (status == -1) {
+        printf("client - error during recv.\n");
+        return EXIT_FAILURE;
+    }
 
     close(sockfd);
 
