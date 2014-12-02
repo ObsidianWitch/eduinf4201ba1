@@ -37,7 +37,15 @@ add_executable(exo2_client.out
 
 add_executable(exo2_server.out
     exo2/server.c
+    exo2/tools.c
+    exo2/tools.h
 )
 
-# TODO Exercice 3
+# Exercice 3
+add_executable(exo3_client.out
+    exo3/client.c
+    exo3/tools.c
+    exo3/tools.h
+)
+
 # TODO Exercice 4
