@@ -77,3 +77,12 @@ char* create_msg(const char* in) {
 
     return out;
 }
+
+char* extract_msg(char* in, size_t in_len) {
+    int pid;
+    char *out = malloc(sizeof(char) * in_len);
+
+    sscanf(in, "%d: %s", &pid, out);
+
+    return out;
+}

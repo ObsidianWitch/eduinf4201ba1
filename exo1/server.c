@@ -14,6 +14,7 @@ int main(int argc, const char* argv[]) {
     int sockfd, status;
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE];
+    char *extracted_msg, *new_msg;
 
     if (argc < 2) {
         printf("Missing arguments\nUsage : %s port\n", argv[0]);
@@ -55,17 +56,27 @@ int main(int argc, const char* argv[]) {
 
         printf("server - received %d bytes : %s\n", recv_size, buffer);
 
-        // send to the client the message we previously received
-        status = sendto_complete(sockfd, buffer, recv_size,
+        /* Extract the message (remove the client PID from what has been
+         * received), and create a new message with the server PID.
+         */
+        extracted_msg = extract_msg(buffer, recv_size);
+        puts(extracted_msg);
+        new_msg = create_msg(extracted_msg);
+        puts(new_msg);
+
+        // send to the client the new message
+        status = sendto_complete(sockfd, new_msg, strlen(new_msg),
             (struct sockaddr *) &client_addr);
 
         if (status == -1) {
-            printf("server - the message could not be completely sent to %d",
+            printf("server - the message could not be completely sent to %d.\n",
             inet_ntoa(client_addr.sin_addr));
         }
     }
 
     close(sockfd);
+    free(extracted_msg);
+    free(new_msg);
 
     return EXIT_SUCCESS;
 }
