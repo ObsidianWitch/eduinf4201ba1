@@ -9,6 +9,6 @@ int sendto_complete(int sockfd, char* msg, int msg_size,
 int send_complete(int sockfd, char* msg, int msg_size);
 int recvfrom_helper(int sockfd, char *buffer, int buffer_size, int *recv_size,
     struct sockaddr *src_addr, socklen_t *addrlen);
-int recv_print(int sockfd, char *buf, size_t len);
+int recv_print(int sockfd);
 
 #endif // SOCKET_TOOLS_H

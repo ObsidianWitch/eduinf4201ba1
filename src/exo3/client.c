@@ -5,33 +5,21 @@
 #include <stdio.h>
 #include <string.h>
 #include "socket_tools.h"
+#include "http_tools.h"
 
 #define REQUEST_LEN 512
-#define BUFFER_LEN 1024
-
-void create_GET_request(char* out, const char* host, const char* res,
-    const char* port)
-{
-    snprintf(out, REQUEST_LEN,
-        "GET %s HTTP/1.1\r\n"
-        "Host: %s:%s\r\n"
-        "Connection: close\r\n"
-        "Accept: text/html\r\n\r\n",
-        res, host, port
-    );
-}
 
 /**
-* Client entry point, the following arguments are needed :
-*    - server hostname / server IP
-*    - server port
-*    - filename (resource we want to retrieve on the server)
-*/
+ * Client entry point, the following arguments are needed :
+ *    - server hostname / server IP
+ *    - server port
+ *    - filename (resource we want to retrieve on the server)
+ */
 int main(int argc, const char* argv[]) {
     int sockfd, status;
     struct hostent *he;
     struct sockaddr_in dest_addr;
-    char request[REQUEST_LEN], buffer[BUFFER_LEN];
+    char request[REQUEST_LEN];
 
     if (argc < 4) {
         printf("Missing arguments\nUsage : %s hostname port filename\n", argv[0]);
@@ -66,7 +54,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // Send request
-    create_GET_request(request, argv[1], argv[3], argv[2]);
+    create_GET_request(request, REQUEST_LEN, argv[1], argv[3], argv[2]);
     status = send_complete(sockfd, request, strlen(request));
     if (status == -1) {
         printf("client - request could not completely be sent.\n");
@@ -75,7 +63,7 @@ int main(int argc, const char* argv[]) {
 
     puts(request);
 
-    status = recv_print(sockfd, buffer, BUFFER_LEN);
+    status = recv_print(sockfd);
     if (status == -1) {
         printf("client - error during recv.\n");
         return EXIT_FAILURE;

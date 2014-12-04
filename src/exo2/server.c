@@ -7,9 +7,9 @@
 #define BUFFER_LEN 1024
 
 /**
-* Server entry point, the following arguments are required :
-*     - port on which the clients will connect
-*/
+ * Server entry point, the following arguments are required :
+ *     - port on which the clients will connect
+ */
 int main(int argc, const char* argv[]) {
     int sockfd, clientfd, status;
     struct sockaddr_in serv_addr;
@@ -54,7 +54,7 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    recv_print(clientfd, buffer, BUFFER_LEN);
+    recv_print(clientfd);
 
     close(sockfd);
     close(clientfd);

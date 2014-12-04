@@ -4,18 +4,20 @@
 #include <stdlib.h>
 #include "socket_tools.h"
 
+#define BUFFER_LEN 1024
+
 /**
-* Send a complete message with the connectionless socket specified in parameter
-* (sockfd file descriptor).
-* @param sockfd sending connectionless socket
-* @param msg message to send
-* @param msg_size size of the message to send
-* @param dest_addr address of the target
-* @return Returns 0 on success, and -1 if the message could not completely be
-* sent.
-*/
+ * Send a complete message with the connectionless socket specified in parameter
+ * (sockfd file descriptor).
+ * @param sockfd sending connectionless socket
+ * @param msg message to send
+ * @param msg_size size of the message to send
+ * @param dest_addr address of the target
+ * @return Returns 0 on success, and -1 if the message could not completely be
+ * sent.
+ */
 int sendto_complete(int sockfd, char* msg, int msg_size,
-const struct sockaddr *dest_addr)
+    const struct sockaddr *dest_addr)
 {
     int sent_size = 0;
 
@@ -35,16 +37,15 @@ const struct sockaddr *dest_addr)
 }
 
 /**
-* Send a complete message with the connected socket specified in parameter
-* (sockfd file descriptor).
-*
-* @param sockfd sending connected socket
-* @param msg message to send
-* @param msg_size size of the message to send
-* @param addrlen size of dest_addr
-* @return Returns 0 on success, and -1 if the message could not completely be
-* sent.
-*/
+ * Send a complete message with the connected socket specified in parameter
+ * (sockfd file descriptor).
+ *
+ * @param sockfd sending connected socket
+ * @param msg message to send
+ * @param msg_size size of the message to send
+ * @return Returns 0 on success, and -1 if the message could not completely be
+ * sent.
+ */
 int send_complete(int sockfd, char* msg, int msg_size) {
     int sent_size = 0;
 
@@ -63,11 +64,11 @@ int send_complete(int sockfd, char* msg, int msg_size) {
 }
 
 /**
-* Receive a message from a socket and adds a trailing '\0' to it.
-* @return Returns 0 on success, -1 otherwise.
-*/
+ * Receive a message from a socket and adds a trailing '\0' to it.
+ * @return Returns 0 on success, -1 otherwise.
+ */
 int recvfrom_helper(int sockfd, char *buffer, int buffer_size, int *recv_size,
-struct sockaddr *src_addr, socklen_t *addrlen)
+    struct sockaddr *src_addr, socklen_t *addrlen)
 {
     *recv_size = recvfrom(sockfd, buffer, buffer_size, 0, src_addr, addrlen);
     if (*recv_size == -1) {
@@ -89,19 +90,18 @@ struct sockaddr *src_addr, socklen_t *addrlen)
 }
 
 /**
-* Receive a complete message by making multiple recv calls, and each time
-* a recv call returns, prints it.
-*
-* @param sockfd
-* @param buf buffer
-* @param len size of the buffer
-* @return 0 on success, -1 otherwise.
+ * Receive a complete message by making multiple recv calls, and each time
+ * a recv call returns, prints it.
+ *
+ * @param sockfd
+ * @return 0 on success, -1 otherwise.
 */
-int recv_print(int sockfd, char *buf, size_t len) {
+int recv_print(int sockfd) {
     int recv_size;
+    char buf[BUFFER_LEN];
 
     do {
-        recv_size = read(sockfd, buf, len - 1);
+        recv_size = read(sockfd, buf, BUFFER_LEN - 1);
         if (recv_size == -1) {
             perror("recv");
             break;

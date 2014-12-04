@@ -8,9 +8,9 @@
 #define BUFFER_SIZE 256
 
 /**
-* Server entry point, the following arguments are required :
-*     - port on which the clients will connect
-*/
+ * Server entry point, the following arguments are required :
+ *     - port on which the clients will connect
+ */
 int main(int argc, const char* argv[]) {
     int sockfd, status;
     struct sockaddr_in serv_addr;
