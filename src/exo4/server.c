@@ -1,13 +1,17 @@
+#include <sys/sendfile.h>
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <string.h>
 #include "socket_tools.h"
 #include "http_tools.h"
 
 #define BUFFER_LEN 1024
+#define DEFAULT_PAGE "index.html"
 
 /*
+TODO
 Exercice 4
 Ecrire un petit serveur web qui réponde aux requêtes du client écrit précédemment. Ce
 serveur stockera dans un fichier local (log_file) toutes les requêtes servies ou non. Pour
@@ -18,7 +22,8 @@ requêtes http sur le premier port, et retournera son fichier de log si un clien
 le second port.
 */
 
-//#define BUFFER_LEN 1024
+int init_stream_server_socket(int port);
+void handle_GET_request(int clientfd);
 
 /**
  * Server entry point, the following arguments are required :
@@ -47,20 +52,51 @@ int main(int argc, const char* argv[]) {
     }
 
     // TODO receive multiple requests
+    // TODO handle requests from the second port
 
-    char *res = recv_res_GET_request(clientfd);
-    if (res != NULL) {
-        puts(res); // TODO handle request : HTTP header for sending file + file
-
-        // TODO if file could not be found, send corresponding HTTP header
-    }
-    free(res);
+    handle_GET_request(clientfd);
 
     close(sockfd_http);
     close(sockfd_log);
     close(clientfd);
 
     return EXIT_SUCCESS;
+}
+
+/*
+ * Handle a GET request from a client.
+ *
+ * @param clientfd File descriptor from the client sending the GET request.
+ */
+void handle_GET_request(int clientfd) {
+    char *res = recv_res_GET_request(clientfd);
+
+    if (res != NULL) {
+        int filefd, status;
+        char *path;
+
+        // TODO log
+
+        if (strcmp(res, "/") == 0) {
+            path = DEFAULT_PAGE;
+        }
+        else {
+            path = res + 1; // file path without the leading "/"
+        }
+
+        filefd = open(path, O_RDONLY);
+        if (filefd == -1) {
+            perror("open");
+            // TODO continue;
+        }
+
+        status = sendfile(clientfd, filefd, NULL, 1024); // TODO modify 100 by count
+        if (status == -1) {
+            perror("sendfile");
+        }
+    }
+
+    free(res);
 }
 
 /**

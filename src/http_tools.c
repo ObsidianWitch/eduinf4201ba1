@@ -38,6 +38,8 @@ char* recv_res_GET_request(int sockfd) {
     size_t remaining_buf_size = BUFFER_LEN;
     char *res = NULL;
 
+    /* while there is something to read, and until the resource has been
+     * retrieved, process the buffer */
     do {
         int process_status;
 
