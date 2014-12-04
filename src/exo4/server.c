@@ -23,7 +23,7 @@ le second port.
 */
 
 int init_stream_server_socket(int port);
-void handle_GET_request(int clientfd);
+int handle_GET_request(int clientfd);
 
 /**
  * Server entry point, the following arguments are required :
@@ -67,36 +67,40 @@ int main(int argc, const char* argv[]) {
  * Handle a GET request from a client.
  *
  * @param clientfd File descriptor from the client sending the GET request.
+ * @return 0 on success, -1 otherwise;
  */
-void handle_GET_request(int clientfd) {
-    char *res = recv_res_GET_request(clientfd);
+int handle_GET_request(int clientfd) {
+    int filefd, status;
+    char *path, *res;
 
-    if (res != NULL) {
-        int filefd, status;
-        char *path;
+    res = recv_res_GET_request(clientfd);
+    if (res == NULL) {
+        return -1;
+    }
 
-        // TODO log
+    // TODO log
 
-        if (strcmp(res, "/") == 0) {
-            path = DEFAULT_PAGE;
-        }
-        else {
-            path = res + 1; // file path without the leading "/"
-        }
+    if (strcmp(res, "/") == 0) {
+        path = DEFAULT_PAGE;
+    }
+    else {
+        path = res + 1; // file path without the leading "/"
+    }
 
-        filefd = open(path, O_RDONLY);
-        if (filefd == -1) {
-            perror("open");
-            // TODO continue;
-        }
+    filefd = open(path, O_RDONLY);
+    if (filefd == -1) {
+        perror("open");
+        return -1;
+    }
 
-        status = sendfile(clientfd, filefd, NULL, 1024); // TODO modify 100 by count
-        if (status == -1) {
-            perror("sendfile");
-        }
+    status = sendfile(clientfd, filefd, NULL, 1024); // TODO modify 100 by count
+    if (status == -1) {
+        perror("sendfile");
+        return -1;
     }
 
     free(res);
+    return 0;
 }
 
 /**
