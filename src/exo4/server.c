@@ -37,7 +37,7 @@ int main(int argc, const char* argv[]) {
     sockfd_http = init_stream_server_socket(atoi(argv[1]));
     sockfd_log = init_stream_server_socket(atoi(argv[2]));
 
-    // TODO accept multiple client
+    // TODO accept multiple client from multiple ports -> fork
 
     // Accept one connection request from a client
     clientfd = accept(sockfd_http, NULL, NULL);
@@ -48,7 +48,13 @@ int main(int argc, const char* argv[]) {
 
     // TODO receive multiple requests
 
-    recv_print(clientfd);
+    char *res = recv_res_GET_request(clientfd);
+    if (res != NULL) {
+        puts(res); // TODO handle request : HTTP header for sending file + file
+
+        // TODO if file could not be found, send corresponding HTTP header
+    }
+    free(res);
 
     close(sockfd_http);
     close(sockfd_log);

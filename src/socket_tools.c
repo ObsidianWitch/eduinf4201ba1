@@ -103,7 +103,7 @@ int recv_print(int sockfd) {
     do {
         recv_size = read(sockfd, buf, BUFFER_LEN - 1);
         if (recv_size == -1) {
-            perror("recv");
+            perror("read");
             break;
         }
 
