@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <string.h>
 #include "socket_tools.h"
 #include "http_tools.h"
@@ -62,37 +63,40 @@ int main(int argc, const char* argv[]) {
     FD_SET(sockfd_http, &readfds);
     FD_SET(sockfd_log, &readfds);
 
-    status = select(sockfd_log + 1, &readfds, NULL, NULL, NULL);
-    if (status == -1) {
-        perror("select");
-    }
-    else if (status != 0) {
-        if (FD_ISSET(sockfd_http, &readfds)) {
-            struct sockaddr_in client_addr;
-            socklen_t client_addrlen = sizeof(client_addr);
-
-            int clientfd = accept(sockfd_http, (struct sockaddr *) &client_addr, &client_addrlen);
-            if (clientfd == -1) {
-                perror("server (http) - accept");
-            }
-
-            handle_GET_request(clientfd, client_addr.sin_addr);
-
-            close(clientfd);
+    while(1) {
+        status = select(sockfd_log + 1, &readfds, NULL, NULL, NULL);
+        if (status == -1) {
+            perror("select");
         }
+        else if (status != 0) {
+            if (FD_ISSET(sockfd_http, &readfds)) {
+                struct sockaddr_in client_addr;
+                socklen_t client_addrlen = sizeof(client_addr);
 
-        if (FD_ISSET(sockfd_log, &readfds)) {
-            int clientfd = accept(sockfd_log, NULL, NULL);
-            if (clientfd == -1) {
-                perror("server (log) - accept");
+                int clientfd = accept(sockfd_http, (struct sockaddr *) &client_addr,
+                    &client_addrlen);
+                if (clientfd == -1) {
+                    perror("server (http) - accept");
+                }
+
+                handle_GET_request(clientfd, client_addr.sin_addr);
+
+                close(clientfd);
             }
 
-            // receive request from the client but don't use it
-            recv_res_GET_request(clientfd);
+            if (FD_ISSET(sockfd_log, &readfds)) {
+                int clientfd = accept(sockfd_log, NULL, NULL);
+                if (clientfd == -1) {
+                    perror("server (log) - accept");
+                }
 
-            fsendfile_helper(logfd, clientfd);
+                // receive request from the client but don't use it
+                recv_res_GET_request(clientfd);
 
-            close(clientfd);
+                fsendfile_helper(logfd, clientfd);
+
+                close(clientfd);
+            }
         }
     }
 
@@ -170,6 +174,11 @@ int handle_GET_request(int clientfd, struct in_addr client_addr) {
     }
 
     status = sendfile_helper(path, clientfd);
+    if (status == -1) {
+        if (errno == ENOENT) { // file not found -> send a 404 response
+            send_complete(clientfd, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE));
+        }
+    }
 
     free(res);
 

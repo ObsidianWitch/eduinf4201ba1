@@ -16,6 +16,7 @@ int sendfile_helper(char *filepath, int fd_dest) {
 
     filefd = open(filepath, O_RDONLY);
     if (filefd == -1) {
+        printf("filepath: %s\n", filepath);
         perror("open");
         return -1;
     }

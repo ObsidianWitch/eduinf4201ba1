@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include "http_tools.h"
 
-#define BUFFER_LEN 1024
-
 /**
  * Create a GET request from the given parameters.
  * @param buf Buffer which will contain the request.
