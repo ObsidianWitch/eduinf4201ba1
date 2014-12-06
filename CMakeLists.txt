@@ -52,6 +52,8 @@ add_executable(exo3_client.out
     src/exo3/client.c
     src/socket_tools.c
     src/socket_tools.h
+    src/file_tools.c
+    src/file_tools.h
     src/http_tools.c
     src/http_tools.h
 )

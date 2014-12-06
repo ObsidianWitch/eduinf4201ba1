@@ -19,7 +19,7 @@ int main(int argc, const char* argv[]) {
     int sockfd, status;
     struct hostent *he;
     struct sockaddr_in dest_addr;
-    char request[REQUEST_LEN];
+    char *request;
 
     if (argc < 4) {
         printf("Missing arguments\nUsage : %s hostname port filename\n", argv[0]);
@@ -54,14 +54,19 @@ int main(int argc, const char* argv[]) {
     }
 
     // Send request
-    create_GET_request(request, REQUEST_LEN, argv[1], argv[3], argv[2]);
+    request = create_GET_request(argv[1], argv[3], argv[2]);
+    if (request == NULL) {
+        printf("client - could not create the GET request.");
+        return EXIT_FAILURE;
+    }
+    puts(request);
+
     status = send_complete(sockfd, request, strlen(request));
+    free(request);
     if (status == -1) {
         printf("client - request could not completely be sent.\n");
         return EXIT_FAILURE;
     }
-
-    puts(request);
 
     status = recv_print(sockfd);
     if (status == -1) {

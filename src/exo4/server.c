@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <errno.h>
 #include <string.h>
 #include "socket_tools.h"
 #include "http_tools.h"
@@ -64,6 +63,11 @@ int main(int argc, const char* argv[]) {
     FD_SET(sockfd_log, &readfds);
 
     while(1) {
+        /* TODO useless?
+        struct timeval tv;
+        tv.tv_sec = 2;
+        tv.tv_usec = 500000;*/
+
         status = select(sockfd_log + 1, &readfds, NULL, NULL, NULL);
         if (status == -1) {
             perror("select");
@@ -90,10 +94,13 @@ int main(int argc, const char* argv[]) {
                     perror("server (log) - accept");
                 }
 
-                // receive request from the client but don't use it
-                recv_res_GET_request(clientfd);
+                // TODO? receive request from the client but don't use it
+                //recv_res_GET_request(clientfd);
 
-                fsendfile_helper(logfd, clientfd);
+                /* lseek(logfd, 0, SEEK_SET);
+                fsendfile_helper(logfd, clientfd);*/
+
+                sendfile_HTTP_helper("log.txt", clientfd); // TODO pb, ne réutilise pas logfd
 
                 close(clientfd);
             }
@@ -152,13 +159,14 @@ int log_line(struct in_addr client_addr, char *res) {
  * Handle a GET request from a client.
  *
  * @param clientfd File descriptor from the client sending the GET request.
- * @param client_addr client IP address (log)
- * @return 0 on success, -1 otherwise;
+ * @param client_addr client IP address (log information)
+ * @return 0 on success, -1 otherwise.
  */
 int handle_GET_request(int clientfd, struct in_addr client_addr) {
-    int filefd, status;
+    int status;
     char *path, *res;
 
+    // Retrieve resource
     res = recv_res_GET_request(clientfd);
     if (res == NULL) {
         return -1;
@@ -173,12 +181,7 @@ int handle_GET_request(int clientfd, struct in_addr client_addr) {
         path = res + 1; // file path without the leading "/"
     }
 
-    status = sendfile_helper(path, clientfd);
-    if (status == -1) {
-        if (errno == ENOENT) { // file not found -> send a 404 response
-            send_complete(clientfd, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE));
-        }
-    }
+    status = sendfile_HTTP_helper(path, clientfd);
 
     free(res);
 

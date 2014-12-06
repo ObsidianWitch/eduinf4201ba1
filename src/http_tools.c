@@ -1,26 +1,36 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include "file_tools.h"
 #include "http_tools.h"
 
 /**
  * Create a GET request from the given parameters.
- * @param buf Buffer which will contain the request.
- * @param buf_size Buffer size.
+ *
  * @param host
  * @param res Resource we want to retrieve.
  * @param port Host port.
+ * @return GET request if successful, NULL otherwise
  */
-void create_GET_request(char* buf, size_t buf_size, const char* host,
-    const char* res, const char* port)
-{
-    snprintf(buf, buf_size,
+char* create_GET_request(const char* host, const char* res, const char* port) {
+    char *buf = malloc(BUFFER_LEN);
+
+    int status = snprintf(buf, BUFFER_LEN,
         "GET %s HTTP/1.1\r\n"
         "Host: %s:%s\r\n"
         "Connection: close\r\n"
         "Accept: text/html\r\n\r\n",
         res, host, port
     );
+
+    if(status < 0) {
+        free(buf);
+        return NULL;
+    }
+
+    return buf;
 }
 
 /**
@@ -87,4 +97,87 @@ char* process_GET_buffer(char *buf) {
     }
 
     return res;
+}
+
+/**
+ * Create a HTTP 200 (OK) response.
+ *
+ * @param content_type
+ * @return HTTP response
+ */
+char* create_HTTP_200_response(char *content_type) {
+    char *buf = malloc(BUFFER_LEN);
+
+    int status = snprintf(buf, BUFFER_LEN,
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: %s\r\n\r\n",
+        content_type
+    );
+
+    puts(buf);
+
+    if(status < 0) {
+        free(buf);
+        return NULL;
+    }
+
+    return buf;
+}
+
+/**
+ * Send a file (filepath parameter) to a client which handles HTTP requests
+ * (probably a browser). Before sending the file, the appropriate HTTP response
+ * is sent (200 if the file was found and can be sent, 404 if the file was not
+ * found).
+ *
+ * @param filepath
+ * @param fd_dest To whom the file should be sent.
+ * @return 0 on success, -1 otherwise.
+ */
+int sendfile_HTTP_helper(char* filepath, int fd_dest) {
+    int filefd, status;
+    char *content_type, *response;
+
+    /* retrieve the content_type with the file extension (unsafe, but probably
+     * sufficient for this exercise). */
+    if (strstr(filepath, ".html") != NULL) {
+        content_type = TYPE_HTML;
+    }
+    else if(strstr(filepath, ".txt") != NULL) {
+        content_type = TYPE_PLAIN_TEXT;
+    } else {
+        content_type = TYPE_OCTET_STREAM;
+    }
+
+    // HTTP 200 response
+    response = create_HTTP_200_response(content_type);
+    if (response == NULL) {
+        return -1;
+    }
+
+    // Send the HTTP response to the client
+    status = send_complete(fd_dest, response, sizeof(response));
+    free(response);
+    if (status == -1) {
+        return -1;
+    }
+
+    // Open and send requested file
+    filefd = open(filepath, O_RDONLY);
+    if (filefd == -1) {
+        perror("open");
+
+        // file not found -> HTTP 404 response
+        if (errno == ENOENT) {
+            send_complete(fd_dest, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE));
+        }
+
+        return -1;
+    }
+
+    status = fsendfile_helper(filefd, fd_dest);
+
+    close(filefd);
+
+    return status;
 }
