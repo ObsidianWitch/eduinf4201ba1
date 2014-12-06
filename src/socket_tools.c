@@ -7,6 +7,48 @@
 #define BUFFER_LEN 1024
 
 /**
+* Initialize a stream socket used as a server.
+* Exits the application if one of the steps to create and initialize the socket
+* fails.
+*
+* @param port on which the socket will be bound
+* @return File descriptor of the created socket.
+*/
+int init_stream_server_socket(int port) {
+    int sockfd, status;
+    struct sockaddr_in serv_addr;
+
+    // Create socket (IPv4, connected, TCP)
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("server - socket init");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fill serv_addr
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(serv_addr.sin_zero, 0, sizeof(serv_addr.sin_zero));
+
+    // Bind socket to all local interfaces on the port specified in argument
+    status = bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+    if (status == -1) {
+        perror("server - bind");
+        exit(EXIT_FAILURE);
+    }
+
+    // Passive (listening) socket
+    status = listen(sockfd, 1);
+    if (status == -1) {
+        perror("server - listen");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+
+/**
  * Send a complete message with the connectionless socket specified in parameter
  * (sockfd file descriptor).
  * @param sockfd sending connectionless socket
