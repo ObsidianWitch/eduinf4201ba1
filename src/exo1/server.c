@@ -68,7 +68,7 @@ int main(int argc, const char* argv[]) {
             (struct sockaddr *) &client_addr);
 
         if (status == -1) {
-            printf("server - the message could not be completely sent to %d.\n",
+            printf("server - the message could not be completely sent to %s.\n",
             inet_ntoa(client_addr.sin_addr));
         }
     }

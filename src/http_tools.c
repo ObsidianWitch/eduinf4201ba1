@@ -5,10 +5,18 @@
 
 #define BUFFER_LEN 1024
 
-void create_GET_request(char* out, size_t out_size, const char* host,
+/**
+ * Create a GET request from the given parameters.
+ * @param buf Buffer which will contain the request.
+ * @param buf_size Buffer size.
+ * @param host
+ * @param res Resource we want to retrieve.
+ * @param port Host port.
+ */
+void create_GET_request(char* buf, size_t buf_size, const char* host,
     const char* res, const char* port)
 {
-    snprintf(out, out_size,
+    snprintf(buf, buf_size,
         "GET %s HTTP/1.1\r\n"
         "Host: %s:%s\r\n"
         "Connection: close\r\n"

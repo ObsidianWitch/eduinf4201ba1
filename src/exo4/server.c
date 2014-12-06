@@ -1,5 +1,9 @@
 #include <sys/sendfile.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <arpa/inet.h>
 #include <netinet/in.h>
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -22,8 +26,13 @@ requêtes http sur le premier port, et retournera son fichier de log si un clien
 le second port.
 */
 
+int logfd; // Log file descriptor
+
 int init_stream_server_socket(int port);
-int handle_GET_request(int clientfd);
+int handle_GET_request(int clientfd, struct in_addr client_addr);
+int sendfile_helper(char *filepath, int fd_dest);
+int fsendfile_helper(int fd_src, int fd_dest);
+int log_line(struct in_addr client_addr, char *res);
 
 /**
  * Server entry point, the following arguments are required :
@@ -33,43 +42,106 @@ int handle_GET_request(int clientfd);
 int main(int argc, const char* argv[]) {
     int sockfd_http, sockfd_log, clientfd;
     char buffer[BUFFER_LEN];
+    struct sockaddr_in client_addr;
+    socklen_t client_addrlen;
 
     if (argc < 3) {
         printf("Missing arguments\nUsage : %s port_http port_log\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    sockfd_http = init_stream_server_socket(atoi(argv[1]));
-    sockfd_log = init_stream_server_socket(atoi(argv[2]));
-
-    // TODO accept multiple client from multiple ports -> fork
-
-    // Accept one connection request from a client
-    clientfd = accept(sockfd_http, NULL, NULL);
-    if (clientfd == -1) {
-        perror("server - accept");
+    // Open log file
+    logfd = open("log.txt", O_CREAT|O_RDWR|O_APPEND);
+    if (logfd == -1) {
+        perror("open log");
         return EXIT_FAILURE;
     }
 
-    // TODO receive multiple requests
-    // TODO handle requests from the second port
+    // Open sockets
+    sockfd_http = init_stream_server_socket(atoi(argv[1]));
+    sockfd_log = init_stream_server_socket(atoi(argv[2]));
 
-    handle_GET_request(clientfd);
+
+    /*// TODO accept multiple client from multiple ports -> fork, select ?
+    // Handle requests from clients connecting to the first port
+    // Accept one connection request from a client
+    client_addrlen = sizeof(client_addr);
+    clientfd = accept(sockfd_http, (struct sockaddr *) &client_addr, &client_addrlen);
+    if (clientfd == -1) {
+        perror("server (http) - accept");
+        return EXIT_FAILURE;
+    }
+
+    handle_GET_request(clientfd, client_addr.sin_addr); // TODO receive multiple requests*/
+
+    // TODO accept multiple client from multiple ports -> fork, select ?
+    // Send log file to clients connecting to the second port
+    // Accept one connection request from a client
+    clientfd = accept(sockfd_log, NULL, NULL);
+    if (clientfd == -1) {
+        perror("server (log) - accept");
+        return EXIT_FAILURE;
+    }
+
+    fsendfile_helper(logfd, clientfd);
 
     close(sockfd_http);
     close(sockfd_log);
     close(clientfd);
+    close(logfd);
 
     return EXIT_SUCCESS;
+}
+
+/**
+ * Insert a line in the log file in the following format :
+ *     client_addr - date - resource
+ *
+ * @param client_addr
+ * @param res
+ * @return Returns 0 on success, or -1 if the line could not be added to the log.
+ */
+int log_line(struct in_addr client_addr, char *res) {
+    char datestr[200];
+    char *client_addr_str = inet_ntoa(client_addr);
+    time_t t = time(NULL);
+    struct tm *tmp;
+
+    // date
+    tmp = localtime(&t);
+    if (tmp == NULL) {
+        perror("localtime");
+        return -1;
+    }
+
+    if (strftime(datestr, 200, "%T", tmp) == 0) {
+        puts("strftime - could not write the date into datestr");
+        return -1;
+    }
+
+    int str_size = strlen(client_addr_str) + strlen(datestr) + strlen(res) + 8;
+    char *str = malloc(str_size);
+
+    snprintf(str, str_size,
+        "%s - %s - %s\n",
+        client_addr_str, datestr, res
+    );
+
+    write(logfd, str, str_size);
+
+    free(str);
+
+    return 0;
 }
 
 /*
  * Handle a GET request from a client.
  *
  * @param clientfd File descriptor from the client sending the GET request.
+ * @param client_addr client IP address (log)
  * @return 0 on success, -1 otherwise;
  */
-int handle_GET_request(int clientfd) {
+int handle_GET_request(int clientfd, struct in_addr client_addr) {
     int filefd, status;
     char *path, *res;
 
@@ -78,7 +150,7 @@ int handle_GET_request(int clientfd) {
         return -1;
     }
 
-    // TODO log
+    log_line(client_addr, res);
 
     if (strcmp(res, "/") == 0) {
         path = DEFAULT_PAGE;
@@ -87,20 +159,60 @@ int handle_GET_request(int clientfd) {
         path = res + 1; // file path without the leading "/"
     }
 
-    filefd = open(path, O_RDONLY);
+    status = sendfile_helper(path, clientfd);
+
+    free(res);
+
+    return status;
+}
+
+// TODO fichier tools?
+/**
+ * Send a file (filepath parameter) to a destination (fd_dest paramter).
+ *
+ * @param filepath
+ * @param fd_dest To whom the file should be sent.
+ * @return 0 on success, -1 otherwise.
+ */
+int sendfile_helper(char *filepath, int fd_dest) {
+    int filefd, status;
+
+    filefd = open(filepath, O_RDONLY);
     if (filefd == -1) {
         perror("open");
         return -1;
     }
 
-    status = sendfile(clientfd, filefd, NULL, 1024); // TODO modify 100 by count
+    status = fsendfile_helper(filefd, fd_dest);
+
+    close(filefd);
+
+    return status;
+}
+
+/**
+ * Send a file (fd_src) to a destination corresponding to fd_dest.
+ *
+ * @param fd_src Source file descriptor
+ * @param fd_dest Destination file descriptor
+ * @return 0 on success, -1 otherwise.
+ */
+int fsendfile_helper(int fd_src, int fd_dest) {
+    int status;
+    struct stat st;
+
+    status = fstat(fd_src, &st); // Retrieve file size
     if (status == -1) {
-        perror("sendfile");
+        perror("fstat");
         return -1;
     }
 
-    free(res);
-    return 0;
+    status = sendfile(fd_dest, fd_src, NULL, st.st_size);
+    if (status == -1) {
+        perror("sendfile");
+    }
+
+    return status;
 }
 
 /**
