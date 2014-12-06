@@ -1,4 +1,5 @@
 #include <sys/sendfile.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
@@ -37,9 +38,8 @@ int log_line(struct in_addr client_addr, char *res);
  *     - 2nd port on which the clients will connect (retrieve logs)
  */
 int main(int argc, const char* argv[]) {
-    int sockfd_http, sockfd_log, clientfd;
-    struct sockaddr_in client_addr;
-    socklen_t client_addrlen;
+    int sockfd_http, sockfd_log, status;
+    fd_set readfds;
 
     if (argc < 3) {
         printf("Missing arguments\nUsage : %s port_http port_log\n", argv[0]);
@@ -57,33 +57,47 @@ int main(int argc, const char* argv[]) {
     sockfd_http = init_stream_server_socket(atoi(argv[1]));
     sockfd_log = init_stream_server_socket(atoi(argv[2]));
 
+    // clear all entries from the set, and add the sockets fd to the set
+    FD_ZERO(&readfds);
+    FD_SET(sockfd_http, &readfds);
+    FD_SET(sockfd_log, &readfds);
 
-    /*// TODO accept multiple client from multiple ports -> fork, select ?
-    // Handle requests from clients connecting to the first port
-    // Accept one connection request from a client
-    client_addrlen = sizeof(client_addr);
-    clientfd = accept(sockfd_http, (struct sockaddr *) &client_addr, &client_addrlen);
-    if (clientfd == -1) {
-        perror("server (http) - accept");
-        return EXIT_FAILURE;
+    status = select(sockfd_log + 1, &readfds, NULL, NULL, NULL);
+    if (status == -1) {
+        perror("select");
     }
+    else if (status != 0) {
+        if (FD_ISSET(sockfd_http, &readfds)) {
+            struct sockaddr_in client_addr;
+            socklen_t client_addrlen = sizeof(client_addr);
 
-    handle_GET_request(clientfd, client_addr.sin_addr); // TODO receive multiple requests*/
+            int clientfd = accept(sockfd_http, (struct sockaddr *) &client_addr, &client_addrlen);
+            if (clientfd == -1) {
+                perror("server (http) - accept");
+            }
 
-    // TODO accept multiple client from multiple ports -> fork, select ?
-    // Send log file to clients connecting to the second port
-    // Accept one connection request from a client
-    clientfd = accept(sockfd_log, NULL, NULL);
-    if (clientfd == -1) {
-        perror("server (log) - accept");
-        return EXIT_FAILURE;
+            handle_GET_request(clientfd, client_addr.sin_addr);
+
+            close(clientfd);
+        }
+
+        if (FD_ISSET(sockfd_log, &readfds)) {
+            int clientfd = accept(sockfd_log, NULL, NULL);
+            if (clientfd == -1) {
+                perror("server (log) - accept");
+            }
+
+            // receive request from the client but don't use it
+            recv_res_GET_request(clientfd);
+
+            fsendfile_helper(logfd, clientfd);
+
+            close(clientfd);
+        }
     }
-
-    fsendfile_helper(logfd, clientfd);
 
     close(sockfd_http);
     close(sockfd_log);
-    close(clientfd);
     close(logfd);
 
     return EXIT_SUCCESS;
