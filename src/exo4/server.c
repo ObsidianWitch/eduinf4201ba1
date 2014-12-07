@@ -18,16 +18,10 @@
 /*
 TODO
 Exercice 4
-Ecrire un petit serveur web qui réponde aux requêtes du client écrit précédemment. Ce
-serveur stockera dans un fichier local (log_file) toutes les requêtes servies ou non. Pour
-chaque requête ce fichier contiendra l’adresse de la machine du client, la date et le fichier
-demandé.
-Ce serveur recevra 2 numéros de port en argument. Il répondra normalement aux
-requêtes http sur le premier port, et retournera son fichier de log si un client s’y connecte par
-le second port.
+Ecrire un petit serveur web qui
+- répond aux requêtes http sur le premier port
+- retourne son fichier de log sur le second port
 */
-
-int logfd; // Log file descriptor
 
 int handle_GET_request(int clientfd, struct in_addr client_addr);
 int log_line(struct in_addr client_addr, char *res);
@@ -43,13 +37,6 @@ int main(int argc, const char* argv[]) {
 
     if (argc < 3) {
         printf("Missing arguments\nUsage : %s port_http port_log\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    // Open log file
-    logfd = open("log.txt", O_CREAT|O_RDWR|O_APPEND);
-    if (logfd == -1) {
-        perror("open log");
         return EXIT_FAILURE;
     }
 
@@ -97,10 +84,7 @@ int main(int argc, const char* argv[]) {
                 // TODO? receive request from the client but don't use it
                 //recv_res_GET_request(clientfd);
 
-                /* lseek(logfd, 0, SEEK_SET);
-                fsendfile_helper(logfd, clientfd);*/
-
-                sendfile_HTTP_helper("log.txt", clientfd); // TODO pb, ne réutilise pas logfd
+                sendfile_HTTP_helper("log.txt", clientfd);
 
                 close(clientfd);
             }
@@ -109,13 +93,12 @@ int main(int argc, const char* argv[]) {
 
     close(sockfd_http);
     close(sockfd_log);
-    close(logfd);
 
     return EXIT_SUCCESS;
 }
 
 /**
- * Insert a line in the log file in the following format :
+ * Insert a line in the log file with the following format :
  *     client_addr - date - resource
  *
  * @param client_addr
@@ -123,13 +106,13 @@ int main(int argc, const char* argv[]) {
  * @return Returns 0 on success, or -1 if the line could not be added to the log.
  */
 int log_line(struct in_addr client_addr, char *res) {
+    int logfd;
     char datestr[200];
     char *client_addr_str = inet_ntoa(client_addr);
-    time_t t = time(NULL);
-    struct tm *tmp;
 
-    // date
-    tmp = localtime(&t);
+    // Retrieve date
+    time_t t = time(NULL);
+    struct tm *tmp = localtime(&t);
     if (tmp == NULL) {
         perror("localtime");
         return -1;
@@ -140,6 +123,7 @@ int log_line(struct in_addr client_addr, char *res) {
         return -1;
     }
 
+    // Create string which will be inserted into the log file
     int str_size = strlen(client_addr_str) + strlen(datestr) + strlen(res) + 8;
     char *str = malloc(str_size);
 
@@ -148,9 +132,18 @@ int log_line(struct in_addr client_addr, char *res) {
         client_addr_str, datestr, res
     );
 
-    write(logfd, str, str_size);
+    // Open log file
+    logfd = open("log.txt", O_CREAT|O_WRONLY|O_APPEND, 0664);
+    if (logfd == -1) {
+        perror("open log");
+        free(str);
+        return -1;
+    }
+
+    write(logfd, str, strlen(str));
 
     free(str);
+    close(logfd);
 
     return 0;
 }
