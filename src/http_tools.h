@@ -4,7 +4,7 @@
 #define BUFFER_LEN 1024
 
 #define HTTP_404_RESPONSE "HTTP/1.1 404 Not Found\r\n"\
-                          "Content-Type: text/html;charset=utf-8\r\n\r\n"\
+                          "Content-Type: text/html\r\n\r\n"\
                           "<!DOCTYPE html>\r\n"\
                           "<html><body>\r\n"\
                           "<h1>Not Found</h1>\r\n"\

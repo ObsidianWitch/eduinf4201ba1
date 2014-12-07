@@ -149,32 +149,35 @@ int sendfile_HTTP_helper(char* filepath, int fd_dest) {
         content_type = TYPE_OCTET_STREAM;
     }
 
-    // HTTP 200 response
-    response = create_HTTP_200_response(content_type);
-    if (response == NULL) {
-        return -1;
-    }
-
-    // Send the HTTP response to the client
-    status = send_complete(fd_dest, response, sizeof(response));
-    free(response);
-    if (status == -1) {
-        return -1;
-    }
-
-    // Open and send requested file
+    // Open requested file
     filefd = open(filepath, O_RDONLY);
     if (filefd == -1) {
         perror("open");
 
         // file not found -> HTTP 404 response
         if (errno == ENOENT) {
-            send_complete(fd_dest, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE));
+            send_complete(fd_dest, HTTP_404_RESPONSE, strlen(HTTP_404_RESPONSE));
         }
 
         return -1;
     }
 
+    // HTTP 200 response
+    response = create_HTTP_200_response(content_type);
+    if (response == NULL) {
+        close(filefd);
+        return -1;
+    }
+
+    // Send the HTTP response to the client
+    status = send_complete(fd_dest, response, strlen(response));
+    free(response);
+    if (status == -1) {
+        close(filefd);
+        return -1;
+    }
+
+    // send requested file
     status = fsendfile_helper(filefd, fd_dest);
 
     close(filefd);
