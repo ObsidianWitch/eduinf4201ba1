@@ -153,6 +153,10 @@ int recv_print(int sockfd) {
             buf[recv_size] = '\0';
             puts(buf);
         }
+
+        if (strstr(buf, "\r\n\r\n") != NULL) {
+            break;
+        }
     } while(recv_size != 0);
 
     return recv_size;

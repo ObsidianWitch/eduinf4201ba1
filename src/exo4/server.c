@@ -44,16 +44,16 @@ int main(int argc, const char* argv[]) {
     sockfd_http = init_stream_server_socket(atoi(argv[1]));
     sockfd_log = init_stream_server_socket(atoi(argv[2]));
 
-    // clear all entries from the set, and add the sockets fd to the set
-    FD_ZERO(&readfds);
-    FD_SET(sockfd_http, &readfds);
-    FD_SET(sockfd_log, &readfds);
-
+    // Main loop
     while(1) {
-        /* TODO useless?
-        struct timeval tv;
-        tv.tv_sec = 2;
-        tv.tv_usec = 500000;*/
+        /* Clear all entries from the set, and add the sockets fd to the set.
+         * It must be done before each call to select, since the sets are
+         * modified when select returns.
+         * extract from man page : "On exit, the sets are modified in place
+         * to indicate which file descriptors actually changed status." */
+        FD_ZERO(&readfds);
+        FD_SET(sockfd_http, &readfds);
+        FD_SET(sockfd_log, &readfds);
 
         status = select(sockfd_log + 1, &readfds, NULL, NULL, NULL);
         if (status == -1) {
@@ -81,8 +81,8 @@ int main(int argc, const char* argv[]) {
                     perror("server (log) - accept");
                 }
 
-                // TODO? receive request from the client but don't use it
-                //recv_res_GET_request(clientfd);
+                // receive request from the client but don't use it
+                recv_print(clientfd);
 
                 sendfile_HTTP_helper("log.txt", clientfd);
 
