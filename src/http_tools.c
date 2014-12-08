@@ -100,7 +100,7 @@ int recv_print_request(int sockfd) {
 
         if (recv_size != 0) {
             buf[recv_size] = '\0';
-            puts(buf);
+            printf("%s", buf);
         }
 
         if (strstr(buf, "\r\n\r\n") != NULL) {

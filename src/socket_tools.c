@@ -197,7 +197,7 @@ int recv_print(int sockfd) {
 
         if (recv_size != 0) {
             buf[recv_size] = '\0';
-            puts(buf);
+            printf("%s", buf);
         }
     } while(recv_size != 0);
 
