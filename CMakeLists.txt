@@ -39,12 +39,18 @@ add_executable(exo1_server.out
 # Exercice 2
 add_executable(exo2_client.out
     src/exo2/client.c
+    src/socket_tools.c
+    src/socket_tools.h
 )
 
 add_executable(exo2_server.out
     src/exo2/server.c
     src/socket_tools.c
     src/socket_tools.h
+    src/file_tools.c
+    src/file_tools.h
+    src/http_tools.c
+    src/http_tools.h
 )
 
 # Exercice 3

@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "socket_tools.h"
@@ -7,13 +8,13 @@
 #define BUFFER_LEN 1024
 
 /**
-* Initialize a stream socket used as a server.
-* Exits the application if one of the steps to create and initialize the socket
-* fails.
-*
-* @param port on which the socket will be bound
-* @return File descriptor of the created socket.
-*/
+ * Initializes a stream socket used as a server.
+ * Exits the application if one of the steps to create and initialize the socket
+ * fails.
+ *
+ * @param port on which the socket will be bound
+ * @return Created socket's file descriptor.
+ */
 int init_stream_server_socket(int port) {
     int sockfd, status;
     struct sockaddr_in serv_addr;
@@ -42,6 +43,50 @@ int init_stream_server_socket(int port) {
     status = listen(sockfd, 1);
     if (status == -1) {
         perror("server - listen");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+
+/**
+ * Initializes a stream socket used as a client.
+ * Exits the application if one of the steps to create and initialize the socket
+ * fails.
+ *
+ * @param hostname
+ * @param port Host's port
+ * @return Created socket's file descriptor.
+ */
+int init_stream_client_socket(const char* hostname, int port) {
+    int sockfd, status;
+    struct hostent *he;
+    struct sockaddr_in dest_addr;
+
+    // Retrieve server information
+    he = gethostbyname(hostname);
+    if (he == NULL) {
+        perror("client - gethostbyname");
+        exit(EXIT_FAILURE);
+    }
+
+    // Create socket (IPv4, connected, TCP)
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("client - socket init");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fill dest_addr
+    dest_addr.sin_family = AF_INET;
+    dest_addr.sin_port = htons(port);
+    dest_addr.sin_addr = *((struct in_addr*) he->h_addr);
+    memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
+
+    // Connect the socket
+    status = connect(sockfd, (struct sockaddr*) &dest_addr, sizeof(dest_addr));
+    if (status == -1) {
+        perror("client - connect");
         exit(EXIT_FAILURE);
     }
 
@@ -152,10 +197,6 @@ int recv_print(int sockfd) {
         if (recv_size != 0) {
             buf[recv_size] = '\0';
             puts(buf);
-        }
-
-        if (strstr(buf, "\r\n\r\n") != NULL) {
-            break;
         }
     } while(recv_size != 0);
 

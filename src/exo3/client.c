@@ -7,8 +7,6 @@
 #include "socket_tools.h"
 #include "http_tools.h"
 
-#define REQUEST_LEN 512
-
 /**
  * Client entry point, the following arguments are needed :
  *    - server hostname / server IP
@@ -17,8 +15,6 @@
  */
 int main(int argc, const char* argv[]) {
     int sockfd, status;
-    struct hostent *he;
-    struct sockaddr_in dest_addr;
     char *request;
 
     if (argc < 4) {
@@ -26,32 +22,7 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    // Retrieve server information
-    he = gethostbyname(argv[1]);
-    if (he == NULL) {
-        perror("client - gethostbyname");
-        return EXIT_FAILURE;
-    }
-
-    // Create socket (IPv4, connected, TCP)
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        perror("client - socket init");
-        return EXIT_FAILURE;
-    }
-
-    // Fill dest_addr
-    dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(atoi(argv[2]));
-    dest_addr.sin_addr = *((struct in_addr*) he->h_addr);
-    memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
-
-    // Connect the socket
-    status = connect(sockfd, (struct sockaddr*) &dest_addr, sizeof(dest_addr));
-    if (status == -1) {
-        perror("client - connect");
-        return EXIT_FAILURE;
-    }
+    sockfd = init_stream_client_socket(argv[1], atoi(argv[2]));
 
     // Send request
     request = create_GET_request(argv[1], argv[3], argv[2]);

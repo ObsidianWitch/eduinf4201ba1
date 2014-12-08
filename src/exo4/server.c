@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]) {
                 }
 
                 // receive request from the client but don't use it
-                recv_print(clientfd);
+                recv_print_request(clientfd);
 
                 sendfile_HTTP_helper("log.txt", clientfd);
 

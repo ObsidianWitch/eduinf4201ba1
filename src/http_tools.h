@@ -16,6 +16,7 @@
 
 char* create_GET_request(const char* host, const char* res, const char* port);
 char* recv_res_GET_request(int sockfd);
+int recv_print_request(int sockfd);
 char* process_GET_buffer(char *buf);
 int sendfile_HTTP_helper(char* filepath, int fd_dest);
 

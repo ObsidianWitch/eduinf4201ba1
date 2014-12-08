@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "socket_tools.h"
+#include "http_tools.h"
 
 /**
  * Server entry point, the following arguments are required :
@@ -25,7 +26,7 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    recv_print(clientfd);
+    recv_print_request(clientfd);
 
     close(clientfd);
     close(sockfd);
