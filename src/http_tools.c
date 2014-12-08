@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include "file_tools.h"
+#include "socket_tools.h"
 #include "http_tools.h"
 
 /**
@@ -49,7 +51,7 @@ char* create_GET_request(const char* host, const char* res, const char* port) {
  */
 char* recv_res_GET_request(int sockfd) {
     char buf[BUFFER_LEN];
-    size_t recv_size = 0;
+    int recv_size = 0;
     size_t buf_offset = 0;
     size_t remaining_buf_size = BUFFER_LEN;
     char *res = NULL;
@@ -57,8 +59,6 @@ char* recv_res_GET_request(int sockfd) {
     /* while there is something to read, and until the resource has been
      * retrieved, process the buffer */
     do {
-        int process_status;
-
         recv_size = read(sockfd, buf + buf_offset, remaining_buf_size - 1);
         if (recv_size == -1) {
             perror("read");

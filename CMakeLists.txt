@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(TP1_2)
 
-SET(CMAKE_CXX_COMPILER "gcc")
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c99")
+SET(CMAKE_C_COMPILER "gcc")
+SET(CMAKE_C_FLAGS "-Wall -Wextra -std=c99")
 
 include_directories(src)
 

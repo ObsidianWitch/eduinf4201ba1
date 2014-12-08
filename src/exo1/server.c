@@ -1,4 +1,7 @@
+#include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,9 +51,9 @@ int main(int argc, const char* argv[]) {
         int status, recv_size;
 
         // receive message from a client
-        int client_addr_size = sizeof(client_addr);
+        socklen_t client_addr_size = sizeof(client_addr);
         status = recvfrom_helper(sockfd, buffer, BUFFER_SIZE, &recv_size,
-        (struct sockaddr *) &client_addr, &client_addr_size);
+            (struct sockaddr *) &client_addr, &client_addr_size);
         if (status == -1) {
             continue;
         }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "exo1/msg_tools.h"
 #include "socket_tools.h"
 
@@ -43,7 +44,7 @@ int main(int argc, const char* argv[]) {
     // fill dest_addr
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(atoi(argv[2]));
-    dest_addr.sin_addr = *((struct in_addr*) he->h_addr);
+    dest_addr.sin_addr = *((struct in_addr*) he->h_addr_list[0]);
     memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 
     // Create and send message to server

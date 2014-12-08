@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "socket_tools.h"
@@ -80,7 +81,7 @@ int init_stream_client_socket(const char* hostname, int port) {
     // Fill dest_addr
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(port);
-    dest_addr.sin_addr = *((struct in_addr*) he->h_addr);
+    dest_addr.sin_addr = *((struct in_addr*) he->h_addr_list[0]);
     memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 
     // Connect the socket

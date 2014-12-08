@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,7 +12,7 @@
  *    - server port
  */
 int main(int argc, const char* argv[]) {
-    int sockfd, status;
+    int sockfd;
     char c;
 
     if (argc < 3) {
