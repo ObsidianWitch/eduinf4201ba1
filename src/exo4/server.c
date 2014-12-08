@@ -34,7 +34,7 @@ int log_line(struct in_addr client_addr, char *res);
  */
 int main(int argc, const char* argv[]) {
     int sockfd_http, sockfd_log, status;
-    fd_set readfds;
+    fd_set master, readfds;
 
     if (argc < 3) {
         printf("Missing arguments\nUsage : %s port_http port_log\n", argv[0]);
@@ -45,16 +45,17 @@ int main(int argc, const char* argv[]) {
     sockfd_http = init_stream_server_socket(atoi(argv[1]));
     sockfd_log = init_stream_server_socket(atoi(argv[2]));
 
+    // Clear all entries from the sets, and add the sockets fd to master.
+    FD_ZERO(&readfds);
+    FD_ZERO(&master);
+    FD_SET(sockfd_http, &master);
+    FD_SET(sockfd_log, &master);
+
     // Main loop
     while(1) {
-        /* Clear all entries from the set, and add the sockets fd to the set.
-         * It must be done before each call to select, since the sets are
-         * modified when select returns.
-         * extract from man page : "On exit, the sets are modified in place
-         * to indicate which file descriptors actually changed status." */
-        FD_ZERO(&readfds);
-        FD_SET(sockfd_http, &readfds);
-        FD_SET(sockfd_log, &readfds);
+        /* Copy master into readfds. It must be done before each call to select,
+         * since the sets are modified when select returns. */
+        readfds = master;
 
         status = select(sockfd_log + 1, &readfds, NULL, NULL, NULL);
         if (status == -1) {
