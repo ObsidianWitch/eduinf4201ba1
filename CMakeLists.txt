@@ -75,4 +75,13 @@ add_executable(exo4_server.out
     src/file_tools.h
 )
 
-# TODO Exercice 5
+# Exercice 5
+add_executable(exo5_client.out
+    src/exo5/client.c
+    src/socket_tools.c
+    src/socket_tools.h
+    src/file_tools.c
+    src/file_tools.h
+    src/http_tools.c
+    src/http_tools.h
+)
