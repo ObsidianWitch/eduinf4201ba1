@@ -103,10 +103,27 @@
 
 \section*{Exercice 1}
 % TODO
+%* struct *hostent should not be freed
+%    * "the return value may point at static data' (gethostbyname manpage)
+%    * "an application sould never attempt to modify this structure or to free any of its components (MSDN)
+
+% * server side : bind() associate a socket with a port
+
+% * INADDR_ANY : <https://www.cs.cmu.edu/~srini/15-441/F01.full/www/assignments/P2/htmlsim_split/node18.html>,<http://man7.org/linux/man-pages/man7/ip.7.html> : 
+%         When INADDR_ANY is specified in the bind call, the socket will be bound to all local interfaces.
+%    * byte order : http://stackoverflow.com/questions/6081892/does-sin-addr-s-addr-inaddr-any-need-htonl-at-all
+%             INADDR_ANY is the "any address" in IPV4. That address is 0.0.0.0 in dotted notation, so 0x000000 in hex on any endianness. Passing it through htonl has no effect.
+
 \newpage
 
 \section*{Exercice 2}
 % TODO
+
+\subsection*{Utilisation de getaddrinfo}
+% TODO L'ensemble des exercices du TP ont été réalisés en utilisant gethostbyname, il semble cependant
+% que l'usage de getaddrinfo soit aujourd'hui recommandé (source beej's guide, page ??) -> citer les
+% avantages de getaddrinfo par rapport à l'ancienne fonction (entre autres : fonctionne avec IPv4 et IPv6).
+
 \newpage
 
 \section*{Exercice 3}
@@ -123,7 +140,13 @@
 
 \renewcommand\refname{Ressources utilisées}
 \begin{thebibliography}{5} % TODO
-	% \bibitem{bib:netkitwiki} \emph{Netkit Wiki}, \href{http://wiki.netkit.org/index.php/Main_Page}{http://wiki.netkit.org/index.php/Main\_Page}tual-laboratories-with\_19.html}
+% * <http://www.jmarshall.com/easy/http/>
+% * <https://github.com/Zintinio/HappyHTTP/blob/master/happyhttp.cpp>
+% * <http://stackoverflow.com/questions/11208299/http-get-request-using-c-without-libcurl>
+% * <http://www.binarytides.com/receive-full-data-with-recv-socket-function-in-c/>
+% * Beej's guide
+% * <http://www.binarytides.com/receive-full-data-with-recv-socket-function-in-c/>
+% * <http://stackoverflow.com/questions/20922571/server-program-that-listens-on-two-different-socket-interfaces>
 \end{thebibliography}
 
 \end{document}
