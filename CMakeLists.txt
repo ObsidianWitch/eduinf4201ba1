@@ -23,19 +23,6 @@ add_executable(exo1_server.out
     src/socket_tools.h
 )
 
-#TODO Exercice 1 alternative (using getaddrinfo)
-#add_executable(exo1_alt_client.out
-#    src/exo1_alt/client.c
-#    src/exo1/tools.c
-#    src/exo1/tools.h
-#)
-
-#add_executable(exo1_alt_serveur.out
-#    src/exo1_alt/serveur.c
-#    src/exo1/tools.c
-#    src/exo1/tools.h
-#)
-
 # Exercice 2
 add_executable(exo2_client.out
     src/exo2/client.c
@@ -59,8 +46,6 @@ add_executable(exo2_client_alt.out
     src/socket_tools.c
     src/socket_tools.h
 )
-
-# TODO exo2_server_alt.out
 
 # Exercice 3
 add_executable(exo3_client.out

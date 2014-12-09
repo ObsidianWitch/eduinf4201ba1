@@ -16,14 +16,6 @@
 
 #define DEFAULT_PAGE "index.html"
 
-/*
-TODO
-Exercice 4
-Ecrire un petit serveur web qui
-- répond aux requêtes http sur le premier port
-- retourne son fichier de log sur le second port
-*/
-
 int handle_GET_request(int clientfd, struct in_addr client_addr);
 int log_line(struct in_addr client_addr, char *res);
 
