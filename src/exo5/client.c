@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,27 +10,26 @@
 
 /**
  * Client entry point, the following arguments are needed :
- *    - server hostname / server IP
- *    - server port
- *    - filename (resource we want to retrieve on the server)
+ *    - full URL (e.g http://www.google.fr/)
  */
 int main(int argc, const char* argv[]) {
     int sockfd, status;
-    char *request, *full_URL;
+    char *request;
 
-    if (argc < 4) {
-        printf("Missing arguments\nUsage : %s hostname port filename\n", argv[0]);
+    if (argc < 2) {
+        printf(
+            "Missing arguments\n"
+            "Usage : %s full_URL\n"
+            "Example: %s http://www.google.fr/",
+            argv[0], argv[0]
+        );
         return EXIT_FAILURE;
     }
 
     sockfd = init_stream_client_socket(ESIEE_PROXY_IP, atoi(ESIEE_PROXY_PORT));
 
-    full_URL = malloc(1 + strlen(argv[1]) + strlen(argv[3]));
-    strcpy(full_URL, argv[1]);
-    strcat(full_URL, argv[3]);
-
     // Send request
-    request = create_GET_request(ESIEE_PROXY_IP, full_URL, ESIEE_PROXY_PORT);
+    request = create_GET_request(ESIEE_PROXY_IP, argv[1], ESIEE_PROXY_PORT);
     if (request == NULL) {
         printf("client - could not create the GET request.");
         return EXIT_FAILURE;
