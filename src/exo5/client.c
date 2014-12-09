@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
         printf(
             "Missing arguments\n"
             "Usage : %s full_URL\n"
-            "Example: %s http://www.google.fr/",
+            "Example: %s http://www.google.fr/\n",
             argv[0], argv[0]
         );
         return EXIT_FAILURE;
