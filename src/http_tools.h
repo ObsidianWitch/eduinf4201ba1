@@ -3,6 +3,8 @@
 
 #define BUFFER_LEN 1024
 
+#define ESIEE_PROXY "147.215.1.189:3128"
+
 #define HTTP_404_RESPONSE "HTTP/1.1 404 Not Found\r\n"\
                           "Content-Type: text/html\r\n\r\n"\
                           "<!DOCTYPE html>\r\n"\

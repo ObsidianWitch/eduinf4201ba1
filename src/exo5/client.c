@@ -15,7 +15,7 @@
  */
 int main(int argc, const char* argv[]) {
     int sockfd, status;
-    char *request;
+    char *request, *full_URL;
 
     if (argc < 4) {
         printf("Missing arguments\nUsage : %s hostname port filename\n", argv[0]);
@@ -24,8 +24,12 @@ int main(int argc, const char* argv[]) {
 
     sockfd = init_stream_client_socket(argv[1], atoi(argv[2]));
 
+    full_URL = malloc(1 + strlen(argv[1]) + strlen(argv[3]));
+    strcpy(full_URL, argv[1]);
+    strcat(full_URL, argv[3]);
+
     // Send request
-    request = create_GET_request(argv[1], argv[3], argv[2]);
+    request = create_GET_request(ESIEE_PROXY, full_URL, argv[2]);
     if (request == NULL) {
         printf("client - could not create the GET request.");
         return EXIT_FAILURE;
