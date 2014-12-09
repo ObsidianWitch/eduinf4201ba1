@@ -22,14 +22,14 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    sockfd = init_stream_client_socket(argv[1], atoi(argv[2]));
+    sockfd = init_stream_client_socket(ESIEE_PROXY_IP, atoi(ESIEE_PROXY_PORT));
 
     full_URL = malloc(1 + strlen(argv[1]) + strlen(argv[3]));
     strcpy(full_URL, argv[1]);
     strcat(full_URL, argv[3]);
 
     // Send request
-    request = create_GET_request(ESIEE_PROXY, full_URL, argv[2]);
+    request = create_GET_request(ESIEE_PROXY_IP, full_URL, ESIEE_PROXY_PORT);
     if (request == NULL) {
         printf("client - could not create the GET request.");
         return EXIT_FAILURE;
