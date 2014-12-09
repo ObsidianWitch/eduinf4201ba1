@@ -6,6 +6,7 @@
 
 int init_stream_server_socket(int port);
 int init_stream_client_socket(const char* hostname, int port);
+int init_stream_client_socket_alt(const char* hostname, const char *port);
 int sendto_complete(int sockfd, char* msg, int msg_size,
     const struct sockaddr *dest_addr);
 int send_complete(int sockfd, char* msg, int msg_size);

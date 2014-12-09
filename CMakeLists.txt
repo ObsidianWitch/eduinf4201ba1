@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(TP1_2)
 
 SET(CMAKE_C_COMPILER "gcc")
-SET(CMAKE_C_FLAGS "-Wall -Wextra -std=c99")
+SET(CMAKE_C_FLAGS "-Wall -Wextra -std=c99 -D_POSIX_SOURCE")
 
 include_directories(src)
 
@@ -52,6 +52,15 @@ add_executable(exo2_server.out
     src/http_tools.c
     src/http_tools.h
 )
+
+# Exercice 2 alternative
+add_executable(exo2_client_alt.out
+    src/exo2_alt/client.c
+    src/socket_tools.c
+    src/socket_tools.h
+)
+
+# TODO exo2_server_alt.out
 
 # Exercice 3
 add_executable(exo3_client.out

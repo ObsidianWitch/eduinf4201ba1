@@ -95,6 +95,59 @@ int init_stream_client_socket(const char* hostname, int port) {
 }
 
 /**
+ * Initializes a stream socket used as a client. Alternative function using
+ * getaddrinfo instead of gethostbyname.
+ * Exits the application if one of the steps to create and initialize the socket
+ * fails.
+ *
+ * @param hostname
+ * @param port Host's port
+ * @return Created socket's file descriptor.
+ */
+int init_stream_client_socket_alt(const char* hostname, const char *port) {
+    int sockfd, status;
+    struct addrinfo hints, *res, *tmp;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM;
+
+    status = getaddrinfo(hostname, port, &hints, &res);
+    if (status != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+        exit(EXIT_FAILURE);
+    }
+
+    /* res contains a list of address structures, loop until we successfully
+     * connect to the server. */
+    for (tmp = res ; tmp != NULL ; tmp = tmp->ai_next) {
+        sockfd = socket(tmp->ai_family, tmp->ai_socktype, tmp->ai_protocol);
+        if (sockfd == -1) {
+            perror("client - socket init");
+            continue;
+        }
+
+        status = connect(sockfd, tmp->ai_addr, tmp->ai_addrlen);
+        if (status == -1) {
+            perror("client - connect");
+            close(sockfd);
+            continue;
+        }
+
+        break;
+    }
+
+    freeaddrinfo(res);
+
+    if (tmp == NULL) {
+        fprintf(stderr, "client - failed to connect to any server\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+
+/**
  * Send a complete message with the connectionless socket specified in parameter
  * (sockfd file descriptor).
  * @param sockfd sending connectionless socket
