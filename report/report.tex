@@ -29,6 +29,13 @@
 \definecolor{shadecolor}{rgb}{0.96,0.96,0.96}
 \definecolor{TFFrameColor}{rgb}{0.96,0.96,0.96}
 \definecolor{TFTitleColor}{rgb}{0.00,0.00,0.00}
+\definecolor{lightred}{rgb}{1,0.96,0.96}
+\definecolor{darkred}{rgb}{0.85,0.33,0.31}
+\definecolor{lightblue}{HTML}{EBF5FA}
+\definecolor{lightblue2}{HTML}{E3F2FA}
+\definecolor{darkblue}{HTML}{D2DCE1}
+\definecolor{hintbg}{HTML}{FFFAE6}
+\definecolor{hintborder}{HTML}{FAE6BE}
 
 % Redefine leftbar envvironment
 \newlength{\leftbarwidth}
@@ -53,12 +60,6 @@
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 \definecolor{blue}{rgb}{0,0,0.7}
-\definecolor{lightred}{rgb}{1,0.96,0.96}
-\definecolor{darkred}{rgb}{0.85,0.33,0.31}
-\definecolor{lightblue}{HTML}{EBF5FA}
-\definecolor{darkblue}{HTML}{D2DCE1}
-\definecolor{hintbg}{HTML}{FFFAE6}
-\definecolor{hintborder}{HTML}{FAE6BE}
 \lstset{
 	language=C,
 	basicstyle=\scriptsize,
@@ -99,10 +100,12 @@
 % TODO penser à zipper le rapport avec le code source et les envoyer ensemble sur icampus
 
 \subsection{Outils utilisés}
-% TODO parler de netstat & valgrind
+% TODO parler de netstat, valgrind et cmake
+
+\subsection{Instructions de compilation}
+Ci-dessous les instructions pour compiler l'ensemble des exercices. L'utilitaire cmake est nécessaire afin de créer le Makefile.
 
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
-	\textbf{Instructions de compilation (nécessite cmake pour créer le Makefile)} :\\
 	mkdir build\\
 	cd build\\
 	cmake ..\\
@@ -118,17 +121,22 @@ Le client se connecte au serveur, envoie son PID ainsi que le message passé en 
 \subsection{Client}
 Du côté du client, nous souhaitons tout d'abord récupérer l'adresse du serveur à l'aide de son nom (e.g. localhost $\rightarrow$ 127.0.0.1) grâce à la fonction \emph{gethostbyname()}. Une fois cela fait, nous créons la datagram socket.\\
 
-\noindent \textbf{N.B.} La fonction \emph{gethostbyname()} est dépréciée, la page de manuel de la fonction conseille d'utiliser \emph{getaddrinfo()} à la place. \emph{gethostbyname()} sera principalement utilisée dans ce TP, ayant commencé à travailler avec. Nous aurons cependant l'occasion de voir l'utilisation de \emph{getaddrinfo()} dans l'exercice 2, deux versions du client ayant été développées.\\
+\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
+\noindent \textbf{N.B.} La fonction \emph{gethostbyname()} est dépréciée, la page de manuel de la fonction conseille d'utiliser \emph{getaddrinfo()} à la place. \emph{gethostbyname()} sera principalement utilisée dans ce TP, ayant commencé à travailler avec. Nous aurons cependant l'occasion de voir l'utilisation de \emph{getaddrinfo()} dans l'exercice 2, deux versions du client ayant été développées.
+\end{mdframed}
 
+\begin{mdframed}[backgroundcolor=lightblue2, linecolor=darkblue]
 \noindent \textbf{N.B.} Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la fonction \emph{gethostbyname()} ne doit pas être libéré. Celui-ci peut pointer vers des données statiques.
 
-% TODO yellow background, orange frame
-\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
+%\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
+\begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
 	\textbf{gethostbyname man page} :\\ % TODO http://man7.org/linux/man-pages/man3/gethostbyname.3.html
-	``The functions gethostbyname() and gethostbyaddr() may  return  pointers to  static  data, which may be overwritten by later calls.''\\
-
+	``The functions gethostbyname() and gethostbyaddr() may  return  pointers to  static  data, which may be overwritten by later calls.''
+\end{mdframed}
+\begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
 	\noindent\textbf{MSDN hostent structure} :\\ % TODO http://msdn.microsoft.com/en-us/library/windows/desktop/ms738552%28v=vs.85%29.aspx
 	``An application should never attempt to modify this structure or to free any of its components.''
+\end{mdframed}
 \end{mdframed}
 \
 
@@ -231,7 +239,9 @@ int init_stream_client_socket(const char* hostname, int port) {
 \subsubsection{init\_stream\_client\_socket\_alt - getaddrinfo}
 Comme précisé précédemment, l'utilisation de \emph{getaddrinfo()} est aujourd'hui préférée par rapport à \emph{gethostbyname()}. Une alternative à la fonction précédente (initialisation d'une stream socket du côté client) utilisant \emph{getaddrinfo()} a donc été écrite. \emph{getaddrinfo()} possède plusieurs avantage, le premier étant qu'elle fonctionne pour les protocoles IPv4 et IPv6, et le second étant qu'elle permet d'éviter l'étape de remplissage de la structure \emph{sockaddr}, celle-ci est en effet automatiquement remplie. Le premier paramètre est le nom de l'hôte ou son adresse IP, le second est le numéro de port, et le troisième est une structure \emph{addrinfo} qui va permettre de sélectionner les résultats qui nous intéressent. Enfin, le quatrième est une liste de résultats (liste d'\emph{addrinfo}) qui va être remplie par la fonction.\\
 
-\noindent \textbf{N.B.} La fonction \emph{getaddrinfo()} ne fait pas partie du standard C99, mais du standard POSIX, il faut donc compiler le programme avec \emph{-D\_POSIX\_SOURCE}.\\
+\begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
+\noindent \textbf{N.B.} La fonction \emph{getaddrinfo()} ne fait pas partie du standard C99, mais du standard POSIX, il faut donc compiler le programme avec \emph{-D\_POSIX\_SOURCE}.
+\end{mdframed}
 
 \begin{lstlisting}
 int init_stream_client_socket_alt(const char* hostname, const char *port) {
