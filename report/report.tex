@@ -92,54 +92,157 @@
 %\tableofcontents
 %\newpage
 
-\section*{Introduction}
+\section{Introduction}
 % TODO
+% TODO penser à zipper le rapport avec le code source et les envoyer ensemble sur icampus
+
+\subsection{Outils utilisés}
+% TODO parler de netstat & valgrind
 
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
-	Une archive contenant le code source du TP peut être téléchargée à l'adresse
-	suivante : % TODO lien vers archive contenant tous les fichiers du TP
+	\textbf{Instructions de compilation (nécessite cmake pour créer le Makefile)} :\\
+	mkdir build\\
+	cd build\\
+	cmake ..\\
+	make
 \end{mdframed}
 \newpage
 
-\section*{Exercice 1}
-% TODO
-%* struct *hostent should not be freed
-%    * "the return value may point at static data' (gethostbyname manpage)
-%    * "an application sould never attempt to modify this structure or to free any of its components (MSDN)
+\section{Exercice 1}
+L'objectif de cet exercice est de créer un client et un serveur communiquant à l'aide de sockets non connectées (\emph{DGRAM\_SOCKETS}). Un des points notables de telles sockets est que si des données sont envoyées, elles n'arrivent pas forcément, et si elles arrivent, elles n'arrivent par forcément dans l'ordre. Elles sont utiles pour avoir une taille de header plus faible (par rapport à des sockets connectées utilisant TCP) et lorsque la perte de quelques paquets n'a pas d'importance.\\ % TODO à revoir/compléter
 
+Le client se connecte au serveur, envoie son PID ainsi que le message passé en argument du programme au serveur, puis le serveur envoie au client son PID ainsi que le message précédemment reçu.
+
+\subsection{Client}
+Du côté du client, nous souhaitons tout d'abord récupérer l'adresse du serveur à l'aide de son nom (e.g. localhost $\rightarrow$ 127.0.0.1) grâce à la fonction \emph{gethostbyname()}. Une fois cela fait, nous créons la datagram socket.\\
+
+\noindent \textbf{N.B.} La fonction \emph{gethostbyname()} est dépréciée, la page de manuel de la fonction conseille d'utiliser \emph{getaddrinfo()} à la place. \emph{gethostbyname()} sera principalement utilisée dans ce TP, ayant commencé à travailler avec. Nous aurons cependant l'occasion de voir l'utilisation de \emph{getaddrinfo()} dans l'exercice 2, deux versions du client ayant été développées.\\
+
+\noindent \textbf{N.B.} Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la fonction \emph{gethostbyname()} ne doit pas être libéré. Celui-ci peut pointer vers des données statiques.
+
+% TODO yellow background, orange frame
+\begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
+	\textbf{gethostbyname man page} :\\ % TODO http://man7.org/linux/man-pages/man3/gethostbyname.3.html
+	``The functions gethostbyname() and gethostbyaddr() may  return  pointers to  static  data, which may be overwritten by later calls.''\\
+
+	\noindent\textbf{MSDN hostent structure} :\\ % TODO http://msdn.microsoft.com/en-us/library/windows/desktop/ms738552%28v=vs.85%29.aspx
+	``An application should never attempt to modify this structure or to free any of its components.''
+\end{mdframed}
+\
+
+Nous souhaitons pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto\_complete()} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
+
+\begin{lstlisting}
+struct sockaddr_in dest_addr;
+
+...
+
+dest_addr.sin_family = AF_INET;
+dest_addr.sin_port = htons(atoi(argv[2]));
+dest_addr.sin_addr = *((struct in_addr*) he->h_addr_list[0]);
+memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
+\end{lstlisting}
+\
+
+% FIXME fix problème exo1 avant de continuer
+% TODO parler de l'envoi (create_msg + sento_complete) et de la réception (recfrom_helper) d'un message.
+
+\subsection{Serveur}
+% TODO
+
+% TODO
 % * server side : bind() associate a socket with a port
 
-% * INADDR_ANY : <https://www.cs.cmu.edu/~srini/15-441/F01.full/www/assignments/P2/htmlsim_split/node18.html>,<http://man7.org/linux/man-pages/man7/ip.7.html> : 
+% * INADDR_ANY : <https://www.cs.cmu.edu/~srini/15-441/F01.full/www/assignments/P2/htmlsim_split/node18.html>,<http://man7.org/linux/man-pages/man7/ip.7.html> :
 %         When INADDR_ANY is specified in the bind call, the socket will be bound to all local interfaces.
 %    * byte order : http://stackoverflow.com/questions/6081892/does-sin-addr-s-addr-inaddr-any-need-htonl-at-all
 %             INADDR_ANY is the "any address" in IPV4. That address is 0.0.0.0 in dotted notation, so 0x000000 in hex on any endianness. Passing it through htonl has no effect.
 
 \newpage
 
-\section*{Exercice 2}
+\section{Exercice 2}
 % TODO
 
-\subsection*{Utilisation de getaddrinfo}
+\subsection{Client}
+% TODO parler du client, n'était pas demandé dans la consigne, mais permet de faire des tests. De plus la fonction
+
+\subsubsection{gethostbyname}
+
+\subsubsection{getaddrinfo}
+% Utilisation de getaddrinfo
 % TODO L'ensemble des exercices du TP ont été réalisés en utilisant gethostbyname, il semble cependant
 % que l'usage de getaddrinfo soit aujourd'hui recommandé (source beej's guide, page ??) -> citer les
 % avantages de getaddrinfo par rapport à l'ancienne fonction (entre autres : fonctionne avec IPv4 et IPv6).
 % N.B. getaddrinfo is not part of standard c99, but is a POSIX standard -> need to compile with -D_POSIX_SOURCE
 
+\subsection{Serveur}
+
 \newpage
 
-\section*{Exercice 3}
-% TODO
+\section{Exercice 3}
+Le but de cet exercice est de créer un client pouvant se connecter à un serveur web, lui envoyer une requête HTTP, et % TODO
 \newpage
 
-\section*{Exercice 4}
+\section{Exercice 4}
 % TODO
 
 % TODO parler de pourquoi fd_set master & fd_set readfs (voir beej's guide page 42 + extract from man page :
 % "On exit, the sets are modified in place to indicate which file descriptors actually changed status.")
 \newpage
 
-\section*{Exercice 5}
-% TODO
+\section{Exercice 5}
+Nous souhaitons à présent envoyer des requêtes en traversant le proxy de l'ESIEE. Pour cela, nous réutilisons l'exercice 3 en passant des paramètres différents à la fonction \emph{create\_GET\_request} de \emph{http\_tools.c}.\\
+
+Le client doit tout d'abord se connecter au proxy de l'ESIEE et non plus directement au serveur web souhaité. Deux constantes \emph{ESIEE\_PROXY\_IP} et \emph{ESIEE\_PROXY\_PORT} ont ainsi été définies dans \emph{http\_tools.h} et sont ensuite utilisées pour se connecter (voir listing ci-dessous).
+
+% FIXME coloration syntaxique
+\begin{lstlisting}[caption=Extrait de http\_tools.h]
+#define ESIEE_PROXY_IP "147.215.1.189"
+#define ESIEE_PROXY_PORT "3128"
+\end{lstlisting}
+\
+
+Pour qu'une requête HTTP puisse traverser un proxy, il faut que \emph{Request-URI} soit absolue. Nous devons donc passer l'URL complète du site web dans la requête. \emph{Host} quant-à-lui contient l'adresse du proxy.
+
+% TODO coloration syntaxique
+\begin{lstlisting}[caption=Exemple de requête en passant par le proxy de l'ESIEE]
+GET http://www.google.com/ HTTP/1.1\r\n
+Host: 147.215.1.189:3128\r\n
+Connection: close\r\n
+Accept: text/html\r\n\r\n
+\end{lstlisting}
+\
+
+\noindent Ci-dessous un extrait du code de \emph{exo5/client.c} permettant d'effectuer les étapes décrites plus haut.
+
+\begin{lstlisting}
+    int sockfd, status;
+    char *request;
+
+    if (argc < 2) {
+        printf(
+            "Missing arguments\n"
+            "Usage : %s full_URL\n"
+            "Example: %s http://www.google.fr/\n",
+            argv[0], argv[0]
+        );
+        return EXIT_FAILURE;
+    }
+
+    sockfd = init_stream_client_socket(ESIEE_PROXY_IP, atoi(ESIEE_PROXY_PORT));
+
+    // Send request
+    request = create_GET_request(ESIEE_PROXY_IP, argv[1], ESIEE_PROXY_PORT);
+    if (request == NULL) {
+        printf("client - could not create the GET request.");
+        return EXIT_FAILURE;
+    }
+
+    ...
+\end{lstlisting}
+
+% TODO exemple d'exécution (screenshot)
+
 \newpage
 
 \renewcommand\refname{Ressources utilisées}

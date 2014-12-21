@@ -56,7 +56,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // receive message from the server
-    buffer = (msg_size >= BUFFER_SIZE) ? malloc(BUFFER_SIZE) : malloc(msg_size);
+    buffer = malloc(BUFFER_SIZE);
     recvfrom_helper(sockfd, buffer, msg_size, &recv_size , NULL, NULL);
     printf("client - received %d bytes : %s\n", recv_size, buffer);
 
