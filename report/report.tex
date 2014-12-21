@@ -130,7 +130,7 @@ Du côté du client, nous souhaitons tout d'abord récupérer l'adresse du serve
 \end{mdframed}
 \
 
-Nous souhaitons pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto\_complete()} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
+Nous souhaitons pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
 
 \begin{lstlisting}
 struct sockaddr_in dest_addr;
@@ -161,10 +161,30 @@ memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 \newpage
 
 \section{Exercice 2}
-% TODO
+Le but de cet exercice est de créer un serveur permettant d'afficher ce qu'un client s'y étant connecté lui a envoyé. Ce serveur nous permettra entre autres de voir la syntaxe d'une requête HTTP GET en connectant un navigateur web sur l'adresse et le port du serveur.
 
 \subsection{Client}
-% TODO parler du client, n'était pas demandé dans la consigne, mais permet de faire des tests. De plus la fonction
+Cela n'était pas demandé dans la consigne, mais un client a tout d'abord été créé. Les fonctions écrites ici nous servirons de nouveau par la suite, notamment celle nous permettant d'initialiser une stream socket du côté d'un client.\\
+
+Nous initialisons tout d'abord la stream socket (socket connectée) soit à l'aide de la fonction \emph{init\_stream\_client\_socket()}, soit à l'aide de la fonction \emph{init\_stream\_client\_socket\_alt()}. Ces fonctions définies dans le fichier \emph{socket\_tools.c} permettent d'initialiser une stream socket côté client permettant de se connecter à un serveur en utilisant \emph{gethostbyname()} pour la première, et en utilisant \emph{getaddrinfo()} pour la seconde. Celles-ci seront détaillées par la suite. Une fois l'initialisation de la socket effectuée, les caractères écrits sur l'entrée standard sont envoyés un par un au serveur via la socket.
+
+\begin{lstlisting}
+...
+
+sockfd = init_stream_client_socket(argv[1], atoi(argv[2]));
+
+do {
+    int sent_size;
+
+    c = getchar();
+    sent_size = send(sockfd, &c, 1, 0);
+    if (sent_size == -1) {
+        perror("client - send");
+    }
+} while (c != EOF);
+
+...
+\end{lstlisting}
 
 \subsubsection{gethostbyname}
 
