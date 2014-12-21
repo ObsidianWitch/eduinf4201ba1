@@ -57,6 +57,8 @@
 \definecolor{darkred}{rgb}{0.85,0.33,0.31}
 \definecolor{lightblue}{HTML}{EBF5FA}
 \definecolor{darkblue}{HTML}{D2DCE1}
+\definecolor{hintbg}{HTML}{FFFAE6}
+\definecolor{hintborder}{HTML}{FAE6BE}
 \lstset{
 	language=C,
 	basicstyle=\scriptsize,
@@ -75,7 +77,7 @@
 	keywordstyle=[2]{\color{dkgreen}},
 	showstringspaces=false,
   	tabsize=4,
-	moredelim=[is][\small\ttfamily]{/*}{*/},
+	moredelim=[is][\small\ttfamily]{/!}{!/},
 	breaklines=true
 }
 
@@ -89,8 +91,8 @@
 \maketitle
 \newpage
 
-%\tableofcontents
-%\newpage
+\tableofcontents
+\newpage
 
 \section{Introduction}
 % TODO
@@ -121,7 +123,7 @@ Du côté du client, nous souhaitons tout d'abord récupérer l'adresse du serve
 \noindent \textbf{N.B.} Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la fonction \emph{gethostbyname()} ne doit pas être libéré. Celui-ci peut pointer vers des données statiques.
 
 % TODO yellow background, orange frame
-\begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
+\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
 	\textbf{gethostbyname man page} :\\ % TODO http://man7.org/linux/man-pages/man3/gethostbyname.3.html
 	``The functions gethostbyname() and gethostbyaddr() may  return  pointers to  static  data, which may be overwritten by later calls.''\\
 
@@ -166,7 +168,7 @@ Le but de cet exercice est de créer un serveur permettant d'afficher ce qu'un c
 \subsection{Client}
 Cela n'était pas demandé dans la consigne, mais un client a tout d'abord été créé. Les fonctions écrites ici nous servirons de nouveau par la suite, notamment celle nous permettant d'initialiser une stream socket du côté d'un client.\\
 
-Nous initialisons tout d'abord la stream socket (socket connectée) soit à l'aide de la fonction \emph{init\_stream\_client\_socket()}, soit à l'aide de la fonction \emph{init\_stream\_client\_socket\_alt()}. Ces fonctions définies dans le fichier \emph{socket\_tools.c} permettent d'initialiser une stream socket côté client permettant de se connecter à un serveur en utilisant \emph{gethostbyname()} pour la première, et en utilisant \emph{getaddrinfo()} pour la seconde. Celles-ci seront détaillées par la suite. Une fois l'initialisation de la socket effectuée, les caractères écrits sur l'entrée standard sont envoyés un par un au serveur via la socket.
+Nous initialisons tout d'abord la stream socket (socket connectée) soit à l'aide de la fonction \emph{init\_stream\_client\_socket()}, soit à l'aide de la fonction \emph{init\_stream\_client\_socket\_alt()}. Ces fonctions définies dans le fichier \emph{socket\_tools.c} servent à initialiser une socket permettant de se connecter à un serveur en utilisant \emph{gethostbyname()} pour la première, et en utilisant \emph{getaddrinfo()} pour la seconde. Celles-ci seront détaillées par la suite. Une fois l'initialisation de la socket effectuée, les caractères écrits sur l'entrée standard sont envoyés un par un au serveur via la socket. La lecture de caractères s'arrête lorsque le caractère EOF (ctrl + d) est tapé.
 
 \begin{lstlisting}
 ...
@@ -186,16 +188,101 @@ do {
 ...
 \end{lstlisting}
 
-\subsubsection{gethostbyname}
+\subsubsection{init\_stream\_client\_socket - gethostbyname}
+L'initialisation de la socket connectée côté client est similaire à l'initialisation de la datagram socket vue à l'exercice précédent : récupération des informations du serveur à l'aide de \emph{gethostbyname()}, création de la socket (avec \emph{SOCK\_STREAM} et non plus \emph{SOCK\_DGRAM}), et remplissage de la structure \emph{sockaddr\_in}. A cela vient se rajouter l'étape de connexion de la socket à l'aide de l'appel système \emph{connect()} qui prend en paramètres le descripteur de fichier de la socket, l'adresse de la structure précédemment remplie, et sa taille.\\
 
-\subsubsection{getaddrinfo}
-% Utilisation de getaddrinfo
-% TODO L'ensemble des exercices du TP ont été réalisés en utilisant gethostbyname, il semble cependant
-% que l'usage de getaddrinfo soit aujourd'hui recommandé (source beej's guide, page ??) -> citer les
-% avantages de getaddrinfo par rapport à l'ancienne fonction (entre autres : fonctionne avec IPv4 et IPv6).
-% N.B. getaddrinfo is not part of standard c99, but is a POSIX standard -> need to compile with -D_POSIX_SOURCE
+\begin{lstlisting}
+int init_stream_client_socket(const char* hostname, int port) {
+    int sockfd, status;
+    struct hostent *he;
+    struct sockaddr_in dest_addr;
+
+    // Retrieve server information
+    he = gethostbyname(hostname);
+    if (he == NULL) {
+        perror("client - gethostbyname");
+        exit(EXIT_FAILURE);
+    }
+
+    // Create socket (IPv4, connected, TCP)
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("client - socket init");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fill dest_addr
+    dest_addr.sin_family = AF_INET;
+    dest_addr.sin_port = htons(port);
+    dest_addr.sin_addr = *((struct in_addr*) he->h_addr_list[0]);
+    memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
+
+    // Connect the socket
+    status = connect(sockfd, (struct sockaddr*) &dest_addr, sizeof(dest_addr));
+    if (status == -1) {
+        perror("client - connect");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+\end{lstlisting}
+
+\subsubsection{init\_stream\_client\_socket\_alt - getaddrinfo}
+Comme précisé précédemment, l'utilisation de \emph{getaddrinfo()} est aujourd'hui préférée par rapport à \emph{gethostbyname()}. Une alternative à la fonction précédente (initialisation d'une stream socket du côté client) utilisant \emph{getaddrinfo()} a donc été écrite. \emph{getaddrinfo()} possède plusieurs avantage, le premier étant qu'elle fonctionne pour les protocoles IPv4 et IPv6, et le second étant qu'elle permet d'éviter l'étape de remplissage de la structure \emph{sockaddr}, celle-ci est en effet automatiquement remplie. Le premier paramètre est le nom de l'hôte ou son adresse IP, le second est le numéro de port, et le troisième est une structure \emph{addrinfo} qui va permettre de sélectionner les résultats qui nous intéressent. Enfin, le quatrième est une liste de résultats (liste d'\emph{addrinfo}) qui va être remplie par la fonction.\\
+
+\noindent \textbf{N.B.} La fonction \emph{getaddrinfo()} ne fait pas partie du standard C99, mais du standard POSIX, il faut donc compiler le programme avec \emph{-D\_POSIX\_SOURCE}.\\
+
+\begin{lstlisting}
+int init_stream_client_socket_alt(const char* hostname, const char *port) {
+    int sockfd, status;
+    struct addrinfo hints, *res, *tmp;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM;
+
+    status = getaddrinfo(hostname, port, &hints, &res);
+    if (status != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+        exit(EXIT_FAILURE);
+    }
+
+    /* res contains a list of address structures, loop until we successfully
+     * connect to the server. */
+    for (tmp = res ; tmp != NULL ; tmp = tmp->ai_next) {
+        sockfd = socket(tmp->ai_family, tmp->ai_socktype, tmp->ai_protocol);
+        if (sockfd == -1) {
+            perror("client - socket init");
+            continue;
+        }
+
+        status = connect(sockfd, tmp->ai_addr, tmp->ai_addrlen);
+        if (status == -1) {
+            perror("client - connect");
+            close(sockfd);
+            continue;
+        }
+
+        break;
+    }
+
+    freeaddrinfo(res);
+
+    if (tmp == NULL) {
+        fprintf(stderr, "client - failed to connect to any server\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+\end{lstlisting}
 
 \subsection{Serveur}
+% TODO
+
+\subsection{Requête HTTP}
+% TODO récupération d'une requête HTTP
 
 \newpage
 
