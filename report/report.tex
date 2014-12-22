@@ -20,6 +20,7 @@
 \usepackage{wrapfig}	% wrap text around figures
 \usepackage{subcaption}
 
+\usepackage{dirtree} % file tree
 % Colors
 \usepackage[usenames,dvipsnames]{xcolor}
 
@@ -98,6 +99,22 @@
 \section{Introduction}
 % TODO
 % TODO penser à zipper le rapport avec le code source et les envoyer ensemble sur icampus
+
+\subsection{Arborescence}
+% TODO arborescence + description en face de chaque fichier/dossier
+% TODO alternative : environnement description pour donner un bref résumé des différents fichiers présents et leur utilité
+% \dirtree{%
+% .1 src.
+% .2 exo1.
+% .2 exo2.
+% .2 exo2_alt.
+% .2 exo3.
+% .2 exo4.
+% .2 exo5.
+% .2 file_tools.c/.h.
+% .2 http_tools.c/.h.
+% .2 socket_tools.c/.h.
+% }
 
 \subsection{Outils utilisés}
 % TODO parler de netstat, valgrind et cmake
@@ -289,10 +306,70 @@ int init_stream_client_socket_alt(const char* hostname, const char *port) {
 \end{lstlisting}
 
 \subsection{Serveur}
-% TODO
+Du côté du serveur, la socket est tout d'abord initialisée, une requête de connexion d'un client est attendue et acceptée à l'aide de l'appel système \emph{accept()}, puis on affiche ce qu'a envoyé le client.\\
+
+\begin{lstlisting}
+...
+
+sockfd = init_stream_server_socket(atoi(argv[1]));
+
+// Accept one connection request from a client
+clientfd = accept(sockfd, NULL, NULL);
+if (clientfd == -1) {
+    perror("server - accept");
+    return EXIT_FAILURE;
+}
+
+recv_print_request(clientfd);
+
+...
+\end{lstlisting}
+\
+
+L'initialisation de la socket est effectuée à l'aide de la fonction \emph{init\_stream\_server\_socket()} définie dans \emph{socket\_tools.c}. Celle-ci prend en paramètre le port sur lequel la socket va être liée. La socket est d'abord créée à l'aide de l'appel système \emph{socket()}. Une structure \emph{sockaddr\_in} est ensuite remplie, celle-ci va nous servir à lier la socket à l'aide de \emph{bind()}. Nous spécifions que nous souhaitons que la socket soit liée à toutes les interfaces (\emph{INADDR\_ANY}), et au port passé en paramètre. Enfin, cette socket jouant un role de serveur, celle-ci doit être marquée comme une socket passive (ou encore socket d'écoute) afin d'accepter des requêtes de connexion par la suite.\\
+
+\begin{lstlisting}
+int init_stream_server_socket(int port) {
+    int sockfd, status;
+    struct sockaddr_in serv_addr;
+
+    // Create socket (IPv4, connected, TCP)
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("server - socket init");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fill serv_addr
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(serv_addr.sin_zero, 0, sizeof(serv_addr.sin_zero));
+
+    // Bind socket to all local interfaces on the port specified in argument
+    status = bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+    if (status == -1) {
+        perror("server - bind");
+        exit(EXIT_FAILURE);
+    }
+
+    // Passive (listening) socket
+    status = listen(sockfd, 1);
+    if (status == -1) {
+        perror("server - listen");
+        exit(EXIT_FAILURE);
+    }
+
+    return sockfd;
+}
+\end{lstlisting}
+\
+
+Enfin, on reçoit les messages envoyés par le client à l'aide de \emph{read()} et on les affiche jusqu'à ce qu'il n'y ait plus rien à lire ou que {\textbackslash r \textbackslash n \textbackslash r \textbackslash n} (indication de fin d'une requête HTTP) soit lu. Cette dernière étape est réalisée par la fonction \emph{recv\_print\_request} définie dans le fichier \emph{http\_tools.c}.
 
 \subsection{Requête HTTP}
 % TODO récupération d'une requête HTTP
+% TODO exemple d'exécution
 
 \newpage
 
