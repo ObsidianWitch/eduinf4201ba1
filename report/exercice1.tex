@@ -7,11 +7,11 @@ Le client se connecte au serveur, envoie son PID ainsi que le message passé en 
 Du côté du client, nous souhaitons tout d'abord récupérer l'adresse du serveur à l'aide de son nom (e.g. localhost $\rightarrow$ 127.0.0.1) grâce à la fonction \emph{gethostbyname()}. Une fois cela fait, nous créons la datagram socket.\\
 
 \begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
-\noindent \textbf{N.B.} La fonction \emph{gethostbyname()} est dépréciée, la page de manuel de la fonction conseille d'utiliser \emph{getaddrinfo()} à la place. \emph{gethostbyname()} sera principalement utilisée dans ce TP, ayant commencé à travailler avec. Nous aurons cependant l'occasion de voir l'utilisation de \emph{getaddrinfo()} dans l'exercice 2, deux versions du client ayant été développées.
+La fonction \emph{gethostbyname()} est dépréciée, la page de manuel de la fonction conseille d'utiliser \emph{getaddrinfo()} à la place. \emph{gethostbyname()} sera principalement utilisée dans ce TP, ayant commencé à travailler avec. Nous aurons cependant l'occasion de voir l'utilisation de \emph{getaddrinfo()} dans l'exercice 2, deux versions du client ayant été développées.
 \end{mdframed}
 
 \begin{mdframed}[backgroundcolor=lightblue2, linecolor=darkblue]
-\noindent \textbf{N.B.} Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la fonction \emph{gethostbyname()} ne doit pas être libéré. Celui-ci peut pointer vers des données statiques.
+Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la fonction \emph{gethostbyname()} ne doit pas être libéré. Celui-ci peut pointer vers des données statiques.
 
 %\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]

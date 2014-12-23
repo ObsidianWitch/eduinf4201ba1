@@ -68,7 +68,7 @@ int init_stream_client_socket(const char* hostname, int port) {
 Comme précisé précédemment, l'utilisation de \emph{getaddrinfo()} est aujourd'hui préférée par rapport à \emph{gethostbyname()}. Une alternative à la fonction précédente (initialisation d'une stream socket du côté client) utilisant \emph{getaddrinfo()} a donc été écrite. \emph{getaddrinfo()} possède plusieurs avantage, le premier étant qu'elle fonctionne pour les protocoles IPv4 et IPv6, et le second étant qu'elle permet d'éviter l'étape de remplissage de la structure \emph{sockaddr}, celle-ci est en effet automatiquement remplie. Le premier paramètre est le nom de l'hôte ou son adresse IP, le second est le numéro de port, et le troisième est une structure \emph{addrinfo} qui va permettre de sélectionner les résultats qui nous intéressent. Enfin, le quatrième est une liste de résultats (liste d'\emph{addrinfo}) qui va être remplie par la fonction.\\
 
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
-\noindent \textbf{N.B.} La fonction \emph{getaddrinfo()} ne fait pas partie du standard C99, mais du standard POSIX, il faut donc compiler le programme avec \emph{-D\_POSIX\_SOURCE}.
+La fonction \emph{getaddrinfo()} ne fait pas partie du standard C99, mais du standard POSIX, il faut donc compiler le programme avec \emph{-D\_POSIX\_SOURCE}.
 \end{mdframed}
 
 \begin{lstlisting}
