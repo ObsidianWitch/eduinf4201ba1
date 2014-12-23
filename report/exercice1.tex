@@ -1,5 +1,5 @@
 \section{Exercice 1}
-L'objectif de cet exercice est de créer un client et un serveur communiquant à l'aide de sockets non connectées (\emph{DGRAM\_SOCKETS}). Un des points notables de telles sockets est que si des données sont envoyées, elles n'arrivent pas forcément, et si elles arrivent, elles n'arrivent par forcément dans l'ordre. Elles sont utiles pour avoir une taille de header plus faible (par rapport à des sockets connectées utilisant TCP) et lorsque la perte de quelques paquets n'a pas d'importance.\\ % TODO à revoir/compléter
+L'objectif de cet exercice est de créer un client et un serveur communiquant à l'aide de sockets non connectées (\emph{DGRAM\_SOCKETS}). Un des points notables de telles sockets est que si des données sont envoyées, elles n'arrivent pas forcément, et si elles arrivent, elles n'arrivent par forcément dans l'ordre. Elles sont utiles pour avoir une taille de header plus faible (par rapport à des sockets connectées utilisant TCP) et lorsque la perte de quelques paquets n'a pas d'importance.\\
 
 Le client se connecte au serveur, envoie son PID ainsi que le message passé en argument du programme au serveur, puis le serveur envoie au client son PID ainsi que le message précédemment reçu.
 
@@ -39,16 +39,104 @@ memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 \end{lstlisting}
 \
 
-% FIXME fix problème exo1 avant de continuer
-% TODO parler de l'envoi (create_msg + sento_complete) et de la réception (recfrom_helper) d'un message.
+La fonction \emph{sendto()} ne garantie pas que le message soit complétement envoyé, la fonction \emph{sendto\_complete} a donc été créée dans le fichier \emph{socket\_tools.c}. Cette fonction fait appel à \emph{sendto()} tant que la taille des données envoyées est inférieure à la taille totale du message à envoyer.
+
+\begin{lstlisting}
+int sendto_complete(int sockfd, char* msg, int msg_size,
+    const struct sockaddr *dest_addr)
+{
+    int sent_size = 0;
+
+    while (sent_size < msg_size) {
+        int remaining_size = msg_size - sent_size;
+        int temp_size = sendto(sockfd, msg + sent_size, remaining_size, 0,
+        dest_addr, sizeof(*dest_addr));
+        if (temp_size == -1) {
+            perror("sendto");
+            break;
+        }
+
+        sent_size += temp_size;
+    }
+
+    return (sent_size != msg_size) ? -1 : 0;
+}
+\end{lstlisting}
+\
+
+Une fois le message complétement envoyé, on souhaite recevoir la réponse du serveur. Pour cela on utilise la fonction \emph{recvfrom\_helper()} définie dans \emph{socket\_tools.c}. Celle-ci exécute l'appel système \emph{recvfrom()} permettant de recevoir des données via des \emph{SOCK\_DGRAM}, puis s'assure que le message se termine par le caractère \textbackslash 0.
+
+\begin{lstlisting}
+int recvfrom_helper(int sockfd, char *buffer, int buffer_size, int *recv_size,
+    struct sockaddr *src_addr, socklen_t *addrlen)
+{
+    *recv_size = recvfrom(sockfd, buffer, buffer_size, 0, src_addr, addrlen);
+    if (*recv_size == -1) {
+        perror("recvfrom");
+        return -1;
+    }
+
+    // Make sure the received message ends with '\0'.
+    if (buffer[*recv_size - 1] != '\0') {
+        if (*recv_size == buffer_size) {
+            buffer[*recv_size - 1] = '\0';
+        }
+        else {
+            buffer[*recv_size] = '\0';
+        }
+    }
+
+    return 0;
+}
+\end{lstlisting}
 
 \subsection{Serveur}
-% TODO
+Pour le serveur, la socket est tout d'abord créée puis liée à toute les interfaces et à un port spécifique. La création se fait comme précédemment à l'aide de l'appel système \emph{socket()}, et la liaison se fait à l'aide de \emph{bind()} et d'une structure \emph{sockaddr\_in}. Le port passé en argument du programme est utilisé pour le champ \emph{sin\_port} de la structure, et INADDR\_ANY est passé au champ \emph{sin\_addr.s\_addr}. Cette constante indique que la socket est liée à toutes les interfaces locales. \cite{cite:cmu_edu_inaddr_any} \cite{cite:man_ip}
 
-% TODO
-% * server side : bind() associate a socket with a port
+\begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
+``When INADDR\_ANY is specified in the bind call, the  socket will be bound to all local interfaces.''\\
+\emph{man 7 ip}
+\end{mdframed}
 
-% * INADDR_ANY : <https://www.cs.cmu.edu/~srini/15-441/F01.full/www/assignments/P2/htmlsim_split/node18.html>,<http://man7.org/linux/man-pages/man7/ip.7.html> :
-%         When INADDR_ANY is specified in the bind call, the socket will be bound to all local interfaces.
-%    * byte order : http://stackoverflow.com/questions/6081892/does-sin-addr-s-addr-inaddr-any-need-htonl-at-all
-%             INADDR_ANY is the "any address" in IPV4. That address is 0.0.0.0 in dotted notation, so 0x000000 in hex on any endianness. Passing it through htonl has no effect.
+\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
+INADDR\_ANY est représenté par l'adresse \emph{0.0.0.0}, et vaut donc \emph{0x000000} en représentation hexadécimale. Passer cette constante à la fonction \emph{htonl()} n'est donc pas utile, puisque sa valeur hexadécimale est la même en big-endian et en little-endian.
+\end{mdframed}
+\newpage
+
+\begin{lstlisting}
+// Create socket (IPv4, connectionless, UDP)
+sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+if (sockfd == -1) {
+    perror("server - socket init");
+    return EXIT_FAILURE;
+}
+
+// fill serv_addr
+serv_addr.sin_family = AF_INET;
+serv_addr.sin_port = htons(atoi(argv[1]));
+serv_addr.sin_addr.s_addr = INADDR_ANY;
+memset(serv_addr.sin_zero, 0, sizeof(serv_addr.sin_zero));
+
+// bind socket to all local interfaces on the port specified in argument
+status = bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+if (status == -1) {
+    perror("server - bind");
+    return EXIT_FAILURE;
+}
+\end{lstlisting}
+\
+
+Une fois la socket initialisée, le principe est similaire à celui du client. Des données sont tout d'abord reçues d'un client à l'aide de \emph{recvfrom\_helper}, puis le message est traité afin de remplacer le PID du client par celui du serveur, et enfin le message ainsi modifié est envoyé au client à l'aide de \emph{sendto\_complete}. Ces étapes sont effectuées dans une boucle afin de pouvoir traiter les messages de plusieurs clients.
+
+\subsection{Exemple d'exécution}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{screenshots/ex1_client.png}
+	\caption{exo1\_client.out}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{screenshots/ex1_server.png}
+	\caption{exo1\_server.out}
+\end{figure}
