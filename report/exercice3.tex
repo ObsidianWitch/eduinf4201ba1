@@ -1,2 +1,6 @@
 \section{Exercice 3}
 Le but de cet exercice est de créer un client pouvant se connecter à un serveur web, lui envoyer une requête HTTP, et % TODO
+
+% TODO Connection: Keep-Alive non supporté par notre application -> Connection: Close. Si nous laissons Keep-Alive -> problème avec l'appel système read qui ne retourne jamais 0 -> read bloque
+
+% TODO recv_print de socket_tools similaire à recv_print_request de http_tools mais avec une condition en moins

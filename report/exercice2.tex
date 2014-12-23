@@ -179,5 +179,12 @@ int init_stream_server_socket(int port) {
 Enfin, on reçoit les messages envoyés par le client à l'aide de \emph{read()} et on les affiche jusqu'à ce qu'il n'y ait plus rien à lire ou que {\textbackslash r \textbackslash n \textbackslash r \textbackslash n} (indication de fin d'une requête HTTP) soit lu. Cette dernière étape est réalisée par la fonction \emph{recv\_print\_request} définie dans le fichier \emph{http\_tools.c}.
 
 \subsection{Requête HTTP}
-% TODO récupération d'une requête HTTP
-% TODO exemple d'exécution
+On souhaite récupérer la syntaxe d'une requête HTTP à l'aide d'un navigateur web, et du serveur écrit pour cet exercice. Pour cela, le serveur est lancé sur un port (e.g 10000) et une requête est lancé depuis le navigateur à destination de \emph{localhost:10000}. Ci-dessous un exemple de requête reçue.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{screenshots/ex2.png}
+	\caption{exo2\_server.out - récupération d'une requête HTTP}
+\end{figure}
+
+La deux premières lignes de cette requête sont les plus importantes, la première indique que l'on souhaite obtenir la ressource / et que l'on utilise le protocole HTTP/1.1. La seconde ligne indique que la requête est à destination de l'hôte localhost sur le port 10000. Les autres lignes sont optionnelles, et indiquent par exemple de quel navigateur provient la requête, ou encore quels types de fichiers sont acceptés. Les sauts de lignes dans une requête HTTP sont composés d'un retour chariot (\textbackslash r) et d'une nouvelle ligne (\textbackslash n), la dernière ligne étant signalée par deux sauts de ligne (\textbackslash r \textbackslash n \textbackslash r \textbackslash n).
