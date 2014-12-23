@@ -18,7 +18,6 @@ int main(int argc, const char* argv[]) {
     int sockfd, status;
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE];
-    char *extracted_msg, *new_msg;
 
     if (argc < 2) {
         printf("Missing arguments\nUsage : %s port\n", argv[0]);
@@ -48,6 +47,7 @@ int main(int argc, const char* argv[]) {
     // listening loop
     while(1) {
         struct sockaddr_in client_addr;
+        char *extracted_msg, *new_msg;
         int status, recv_size;
 
         // receive message from a client
@@ -67,18 +67,19 @@ int main(int argc, const char* argv[]) {
         new_msg = create_msg(extracted_msg);
 
         // send to the client the new message
-        status = sendto_complete(sockfd, new_msg, strlen(new_msg),
+        status = sendto_complete(sockfd, new_msg, strlen(new_msg) + 1,
             (struct sockaddr *) &client_addr);
 
         if (status == -1) {
             printf("server - the message could not be completely sent to %s.\n",
             inet_ntoa(client_addr.sin_addr));
         }
+
+        free(extracted_msg);
+        free(new_msg);
     }
 
     close(sockfd);
-    free(extracted_msg);
-    free(new_msg);
 
     return EXIT_SUCCESS;
 }
