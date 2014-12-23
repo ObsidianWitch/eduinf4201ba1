@@ -1,28 +1,41 @@
 \section{Introduction}
-% TODO
-% TODO penser à zipper le rapport avec le code source et les envoyer ensemble sur icampus
+L'objectif de ce TP est de se familiariser avec les sockets et comment faire communiquer plusieurs applications entre-elles sur un réseau. Deux types de socket seront utilisées, les sockets non connectées (\emph{SOCK\_DGRAM}) et les sockets connectées (\emph{SOCK\_STREAM}). De plus, le protocole HTTP sera abordé à travers la réalisation d'un client émettant une requête et recevant la réponse correspondante, et la création d'un serveur web répondant à des requêtes.
 
 \subsection{Arborescence}
-% TODO arborescence + description en face de chaque fichier/dossier
-% TODO alternative : environnement description pour donner un bref résumé des différents fichiers présents et leur utilité
-% \dirtree{%
-% .1 src.
-% .2 exo1.
-% .2 exo2.
-% .2 exo2_alt.
-% .2 exo3.
-% .2 exo4.
-% .2 exo5.
-% .2 file_tools.c/.h.
-% .2 http_tools.c/.h.
-% .2 socket_tools.c/.h.
-% }
+\noindent Ci-dessous l'arborescence de fichiers du TP avec pour certains d'entre-eux une brève description.
 
-\subsection{Outils utilisés}
-% TODO parler de netstat, valgrind et cmake
+\dirtree{%
+.1 src.
+.2 exo1.
+.3 client.c.
+.3 server.c.
+.3 msg\_tools.c/.h - Création et extraction d'informations de messages..
+.2 exo2.
+.3 client.c.
+.3 server.c.
+.2 exo2\_alt.
+.3 client.c.
+.2 exo3.
+.3 client.c.
+.2 exo4.
+.3 server.c.
+.2 exo5.
+.3 client.c.
+.2 file\_tools.c/.h - Manipulation de fichiers (transfert de données entre\\ descripteurs de fichiers)..
+.2 http\_tools.c/.h - Manipulation de requêtes HTTP (création, réception, parsing,\\ affichage de requêtes)..
+.2 socket\_tools.c/.h - Manipulation de sockets (initialisation de sockets, envoi\\ complet d'un message, réception d'un message)..
+}
+
+% TODO optionnel
+% \subsection{Outils utilisés}
+% \noindent Les outils suivants ont été utiles lors de la réalisation de ce TP :
+% \begin{itemize}
+%     \item \textbf{netstat} - % TODO description
+%     \item \textbf{valgrind} - % TODO description
+% \end{itemize}
 
 \subsection{Instructions de compilation}
-Ci-dessous les instructions pour compiler l'ensemble des exercices. L'utilitaire cmake est nécessaire afin de créer le Makefile.
+Ci-dessous les instructions pour compiler l'ensemble des exercices. L'utilitaire cmake est nécessaire afin de créer le Makefile. % TODO lien vers cmake
 
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
 	mkdir build\\
