@@ -8,7 +8,7 @@
  *
  * @param fd_src Source file descriptor
  * @param fd_dest Destination file descriptor
- *  @return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 int fsendfile_helper(int fd_src, int fd_dest) {
     int status;

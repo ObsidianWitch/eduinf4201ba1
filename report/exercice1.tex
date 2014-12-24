@@ -15,7 +15,7 @@ Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la
 
 %\begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
-	\textbf{gethostbyname man page} :\\ % TODO http://man7.org/linux/man-pages/man3/gethostbyname.3.html
+	\textbf{gethostbyname(3) man page} :\\ % TODO http://man7.org/linux/man-pages/man3/gethostbyname.3.html
 	``The functions gethostbyname() and gethostbyaddr() may  return  pointers to  static  data, which may be overwritten by later calls.''
 \end{mdframed}
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
@@ -94,8 +94,8 @@ int recvfrom_helper(int sockfd, char *buffer, int buffer_size, int *recv_size,
 Pour le serveur, la socket est tout d'abord créée puis liée à toute les interfaces et à un port spécifique. La création se fait comme précédemment à l'aide de l'appel système \emph{socket()}, et la liaison se fait à l'aide de \emph{bind()} et d'une structure \emph{sockaddr\_in}. Le port passé en argument du programme est utilisé pour le champ \emph{sin\_port} de la structure, et INADDR\_ANY est passé au champ \emph{sin\_addr.s\_addr}. Cette constante indique que la socket est liée à toutes les interfaces locales. \cite{cite:cmu_edu_inaddr_any} \cite{cite:man_ip}
 
 \begin{mdframed}[backgroundcolor=lightblue, linecolor=darkblue]
-``When INADDR\_ANY is specified in the bind call, the  socket will be bound to all local interfaces.''\\
-\emph{man 7 ip}
+\textbf{ip(7) man page :}\\
+``When INADDR\_ANY is specified in the bind call, the  socket will be bound to all local interfaces.''
 \end{mdframed}
 
 \begin{mdframed}[backgroundcolor=hintbg, linecolor=hintborder]
