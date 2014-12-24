@@ -12,8 +12,7 @@ Le client doit tout d'abord se connecter au proxy de l'ESIEE et non plus directe
 
 Pour qu'une requête HTTP puisse traverser un proxy, il faut que \emph{Request-URI} soit absolue. Nous devons donc passer l'URL complète du site web dans la requête. \emph{Host} quant-à-lui contient l'adresse du proxy.
 
-% TODO coloration syntaxique
-\begin{lstlisting}[caption=Exemple de requête en passant par le proxy de l'ESIEE]
+\begin{lstlisting}[caption=Exemple de requête en passant par le proxy de l'ESIEE, language=bash]
 GET http://www.google.com/ HTTP/1.1\r\n
 Host: 147.215.1.189:3128\r\n
 Connection: close\r\n
