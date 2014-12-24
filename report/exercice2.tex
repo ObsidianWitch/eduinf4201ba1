@@ -137,7 +137,7 @@ recv_print_request(clientfd);
 \end{lstlisting}
 \
 
-L'initialisation de la socket est effectuée à l'aide de la fonction \emph{init\_stream\_server\_socket()} définie dans \emph{socket\_tools.c}. Celle-ci prend en paramètre le port sur lequel la socket va être liée. La socket est d'abord créée à l'aide de l'appel système \emph{socket()}. Une structure \emph{sockaddr\_in} est ensuite remplie, celle-ci va nous servir à lier la socket à l'aide de \emph{bind()}. Nous spécifions que nous souhaitons que la socket soit liée à toutes les interfaces (\emph{INADDR\_ANY}), et au port passé en paramètre. Enfin, cette socket jouant un role de serveur, celle-ci doit être marquée comme une socket passive (ou encore socket d'écoute) afin d'accepter des requêtes de connexion par la suite.\\
+L'initialisation de la socket est effectuée à l'aide de la fonction \emph{init\_stream\_server\_socket()} définie dans \emph{socket\_tools.c}. Celle-ci prend en paramètre le port sur lequel la socket va être liée. La socket est d'abord créée à l'aide de l'appel système \emph{socket()}. Une structure \emph{sockaddr\_in} est ensuite remplie, celle-ci va nous servir à lier la socket à l'aide de \emph{bind()}. Nous spécifions que nous souhaitons que la socket soit liée à toutes les interfaces (\emph{INADDR\_ANY}), et au port passé en paramètre. Enfin, cette socket jouant un rôle de serveur, celle-ci doit être marquée comme une socket passive (ou encore socket d'écoute) afin d'accepter des requêtes de connexion par la suite.\\
 
 \begin{lstlisting}
 int init_stream_server_socket(int port) {

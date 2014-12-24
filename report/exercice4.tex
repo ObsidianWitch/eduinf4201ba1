@@ -15,7 +15,7 @@ Sachant que les sets passés en paramètre à \emph{select()} sont modifiés à 
 \end{mdframed}
 \
 
-S'il y a des données qui peuvent être lues sur la première socket (\emph{sockfd\_http}), alors on accepte la connexion du client à la socket (\emph{accept()}) puis on traite la requête avec la fonction \emph{handle\_GET\_request()}. Celle-ci fait appel à \emph{recv\_res\_GET\_request} (fichier \emph{http\_tools.c}) qui permet de recevoir une requête HTTP et la parser afin de récupérer le chemin de la ressource que souhaite obtenir le client. Une ligne est ensuite ajoutée dans le fichier de log au format \emph{adresse du client - date - ressource souhaitée} à l'aide de \emph{log\_line()}. Enfin, le fichier est envoyé à l'aide de la fonction \emph{sendfile\_HTTP\_helper()} (fichier http\_tools.c).\\
+S'il y a des données qui peuvent être lues sur la première socket (\emph{sockfd\_http}), alors on accepte la connexion du client à la socket (\emph{accept()}) puis on traite la requête avec la fonction \emph{handle\_GET\_request()}. Celle-ci fait appel à \emph{recv\_res\_GET\_request()} (fichier \emph{http\_tools.c}) qui permet de recevoir une requête HTTP et la parser afin de récupérer le chemin de la ressource que souhaite obtenir le client. Une ligne est ensuite ajoutée dans le fichier de log au format \emph{adresse du client - date - ressource souhaitée} à l'aide de \emph{log\_line()}. Enfin, le fichier est envoyé à l'aide de la fonction \emph{sendfile\_HTTP\_helper()} (fichier http\_tools.c).\\
 
 \begin{lstlisting}
 int handle_GET_request(int clientfd, struct in_addr client_addr) {

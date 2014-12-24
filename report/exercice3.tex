@@ -3,7 +3,7 @@ Le but de cet exercice est de créer un client pouvant se connecter à un serveu
 
 Le programme utilise trois arguments : le premier est le hostname du serveur, le deuxième le port sur lequel on souhaite se connecter, et le troisième la ressource que l'on souhaite récupérer.\\
 
-La première étape est l'initialisation d'une socket connectée à l'aide de la fonction \emph{init\_stream\_client\_socket} qui a été décrite dans l'exercice précédent. Une fois cette première étape effectuée, nous souhaitons créer et envoyer une requête HTTP au serveur. La création de la requête HTTP se fait à l'aide de la fonction \emph{create\_GET\_request} définie dans \emph{http\_tools.c}.\\
+La première étape est l'initialisation d'une socket connectée à l'aide de la fonction \emph{init\_stream\_client\_socket()} qui a été décrite dans l'exercice précédent. Une fois cette première étape effectuée, nous souhaitons créer et envoyer une requête HTTP au serveur. La création de la requête HTTP se fait à l'aide de la fonction \emph{create\_GET\_request()} définie dans \emph{http\_tools.c}.\\
 
 \begin{lstlisting}
 char* create_GET_request(const char* host, const char* res, const char* port) {
@@ -27,7 +27,7 @@ char* create_GET_request(const char* host, const char* res, const char* port) {
 \end{lstlisting}
 \
 
-La ligne \emph{Connection: close} a été spécifiée afin que l'appel système read qui sera utilisé par la suite puisse retourner 0 lorsqu'il n'y a plus rien à recevoir de la part du serveur. Par défaut, \emph{Connection: Keep-Alive} est utilisé ce qui empêche le dernier read de retourner car la connexion n'a pas été fermée.\\
+La ligne \emph{Connection: close} a été spécifiée afin que l'appel système \emph{read()} qui sera utilisé par la suite puisse retourner 0 lorsqu'il n'y a plus rien à recevoir de la part du serveur. Par défaut, \emph{Connection: Keep-Alive} est utilisé ce qui empêche le dernier read de retourner car la connexion n'a pas été fermée.\\
 
 Une fois la requête créée, on l'envoie à l'aide de \emph{send\_complete()} (similaire à \emph{sendto\_complete()}, mais utilisant \emph{send()} à la place de \emph{sendto()}). On récupère ensuite la réponse à l'aide de \emph{recv\_print()} définie dans \emph{socket\_tools.c} qui effectue des appels à \emph{read()} tant que la taille reçue n'est pas égale à 0 (0 étant retourné lorsqu'il n'y a plus rien à recevoir).\\
 

@@ -1,5 +1,5 @@
 \section{Exercice 1}
-L'objectif de cet exercice est de créer un client et un serveur communiquant à l'aide de sockets non connectées (\emph{DGRAM\_SOCKETS}). Un des points notables de telles sockets est que si des données sont envoyées, elles n'arrivent pas forcément, et si elles arrivent, elles n'arrivent par forcément dans l'ordre. Elles sont utiles pour avoir une taille de header plus faible (par rapport à des sockets connectées utilisant TCP) et lorsque la perte de quelques paquets n'a pas d'importance.\\
+L'objectif de cet exercice est de créer un client et un serveur communiquant à l'aide de sockets non connectées (\emph{DGRAM\_SOCKETS}). Un des points notables de telles sockets est que si des données sont envoyées, elles n'arrivent pas forcément, et si elles arrivent, elles n'arrivent pas forcément dans l'ordre. Elles sont utiles pour avoir une taille de header plus faible (par rapport à des sockets connectées utilisant TCP) et lorsque la perte de quelques paquets n'a pas d'importance.\\
 
 Le client se connecte au serveur, envoie son PID ainsi que le message passé en argument du programme au serveur, puis le serveur envoie au client son PID ainsi que le message précédemment reçu.
 
@@ -25,7 +25,7 @@ Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la
 \end{mdframed}
 \
 
-On souhaite pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
+On souhaite pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto()} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
 
 \begin{lstlisting}
 struct sockaddr_in dest_addr;
@@ -39,7 +39,7 @@ memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 \end{lstlisting}
 \
 
-La fonction \emph{sendto()} ne garantie pas que le message soit complétement envoyé, la fonction \emph{sendto\_complete} a donc été créée dans le fichier \emph{socket\_tools.c}. Cette fonction fait appel à \emph{sendto()} tant que la taille des données envoyées est inférieure à la taille totale du message à envoyer.
+La fonction \emph{sendto()} ne garantie pas que le message soit complètement envoyé, la fonction \emph{sendto\_complete()} a donc été créée dans le fichier \emph{socket\_tools.c}. Cette fonction fait appel à \emph{sendto()} tant que la taille des données envoyées est inférieure à la taille totale du message à envoyer.
 
 \begin{lstlisting}
 int sendto_complete(int sockfd, char* msg, int msg_size,
@@ -126,7 +126,7 @@ if (status == -1) {
 \end{lstlisting}
 \
 
-Une fois la socket initialisée, le principe est similaire à celui du client. Des données sont tout d'abord reçues d'un client à l'aide de \emph{recvfrom\_helper}, puis le message est traité afin de remplacer le PID du client par celui du serveur, et enfin le message ainsi modifié est envoyé au client à l'aide de \emph{sendto\_complete}. Ces étapes sont effectuées dans une boucle afin de pouvoir traiter les messages de plusieurs clients.
+Une fois la socket initialisée, le principe est similaire à celui du client. Des données sont tout d'abord reçues d'un client à l'aide de \emph{recvfrom\_helper()}, puis le message est traité afin de remplacer le PID du client par celui du serveur, et enfin le message ainsi modifié est envoyé au client à l'aide de \emph{sendto\_complete()}. Ces étapes sont effectuées dans une boucle afin de pouvoir traiter les messages de plusieurs clients.
 
 \subsection{Exemple d'exécution}
 \begin{figure}[h!]
