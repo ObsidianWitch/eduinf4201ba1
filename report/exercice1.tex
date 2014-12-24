@@ -25,7 +25,7 @@ Il est à noter que le pointeur vers la structure \emph{hostent} renvoyé par la
 \end{mdframed}
 \
 
-Nous souhaitons pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
+On souhaite pouvoir envoyer un message au serveur à l'aide de la socket précédemment créée. Pour cela, nous devons utiliser la fonction \emph{sendto} prenant entre autres en paramètre un pointeur vers une structure \emph{sockaddr}. Pour être plus spécifique, nous allons remplir les champs d'une structure \emph{sockaddr\_in} qui est spécifique au protocole IPv4. Cette dernière va permettre d'indiquer à qui envoyer le message. Toutes les informations pour remplir cette structure sont disponibles: la famille d'adresses (ici \emph{AF\_INET} pour IPv4), le port du serveur (récupéré en argument du programme), et l'adresse du serveur (récupérée à l'aide de \emph{gethostbyname()}).
 
 \begin{lstlisting}
 struct sockaddr_in dest_addr;
