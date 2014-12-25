@@ -3,7 +3,7 @@ Le but de cet exercice est de créer un client pouvant se connecter à un serveu
 
 Le programme utilise trois arguments : le premier est le hostname du serveur, le deuxième le port sur lequel on souhaite se connecter, et le troisième la ressource que l'on souhaite récupérer.\\
 
-La première étape est l'initialisation d'une socket connectée à l'aide de la fonction \emph{init\_stream\_client\_socket()} qui a été décrite dans l'exercice précédent. Une fois cette première étape effectuée, nous souhaitons créer et envoyer une requête HTTP au serveur. La création de la requête HTTP se fait à l'aide de la fonction \emph{create\_GET\_request()} définie dans \emph{http\_tools.c}.\\
+La première étape est l'initialisation d'une socket connectée à l'aide de la fonction \emph{init\_stream\_client \_socket()} qui a été décrite dans l'exercice précédent. Une fois cette première étape effectuée, nous souhaitons créer et envoyer une requête HTTP au serveur. La création de la requête HTTP se fait à l'aide de la fonction \emph{create\_GET\_request()} définie dans \emph{http\_tools.c}.\\
 
 \begin{lstlisting}
 char* create_GET_request(const char* host, const char* res, const char* port) {

@@ -39,7 +39,7 @@ memset(dest_addr.sin_zero, 0, sizeof(dest_addr.sin_zero));
 \end{lstlisting}
 \
 
-La fonction \emph{sendto()} ne garantie pas que le message soit complètement envoyé, la fonction \emph{sendto\_complete()} a donc été créée dans le fichier \emph{socket\_tools.c}. Cette fonction fait appel à \emph{sendto()} tant que la taille des données envoyées est inférieure à la taille totale du message à envoyer.
+La fonction \emph{sendto()} ne garantie pas que le message soit complètement envoyé, la fonction \emph{sendto\_ complete()} a donc été créée dans le fichier \emph{socket\_tools.c}. Cette fonction fait appel à \emph{sendto()} tant que la taille des données envoyées est inférieure à la taille totale du message à envoyer.
 
 \begin{lstlisting}
 int sendto_complete(int sockfd, char* msg, int msg_size,
